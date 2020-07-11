@@ -7,7 +7,7 @@ import 'package:flutter_socket_io/socket_io_manager.dart';
 // import 'package:adhara_socket_io/adhara_socket_io.dart';
 // import 'dart:convert';
 
-const String URI = 'http://13.234.75.104:5000/';
+const String URI = 'http://13.234.64.136:5000';
 
 class MyHomePage extends StatefulWidget {
   

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'socket.dart';
 import 'form.dart';
 import 'add_prescription.dart';
+import 'doctor_login.dart';
 
 void main() => runApp(MyApp());
 
@@ -13,7 +14,8 @@ class MyApp extends StatelessWidget {
       title: title,
       home:
       //  MyHomePage()
-      UploadAudioPrescription()      
+      DoctorLogin()
+      // UploadAudioPrescription()      
     );
   }
 }

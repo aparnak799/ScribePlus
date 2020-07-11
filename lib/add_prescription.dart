@@ -44,7 +44,8 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
 
 @override
   Widget build(BuildContext context) {
-    return new Center(
+    return new Scaffold(
+      body: new Center(
       child: new Padding(
         padding: new EdgeInsets.all(8.0),
         child: new Column(
@@ -73,7 +74,7 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
 
             ]),
       ),
-    );
+    ));
   }
 
   Future<void> requestPermission(Permission permission) async {
