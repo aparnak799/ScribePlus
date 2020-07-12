@@ -15,6 +15,7 @@ class DoctorLogin extends StatefulWidget {
 class _DoctorLoginState extends State<DoctorLogin> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String _doctorAddress;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -23,7 +24,10 @@ class _DoctorLoginState extends State<DoctorLogin> {
   }
   @override
   Widget build(BuildContext context) {
+    
+
     return new Scaffold(
+      key: _scaffoldKey,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -62,29 +66,39 @@ class _DoctorLoginState extends State<DoctorLogin> {
           obscureText: true,
         ),
         RaisedButton(
-          child: Text("login"),
+          child: Text("Login"),
           onPressed: (){
-            _postLoginRequest(_doctorAddress, passwordController.text);
-            print(passwordController.text);
-            // login();
+            _postLoginRequest(_doctorAddress, passwordController.text).then((bool result){
+              if(result==false){
+                setState(() {
+                  _doctorAddress='';
+                });
+        
+              final SnackBar snackBar=SnackBar(content:Text('Login Failed'));
+              _scaffoldKey.currentState.showSnackBar(snackBar);
+              }
+            });
           },
         )
       ],
     );
 
   }
-  Future _postLoginRequest(String userAddress, String password) async{
+  Future<bool> _postLoginRequest(String userAddress, String password) async{
     String loginURL="$apiUrl/doctor/login";
+    final SharedPreferences prefs = await _prefs;
     print({'address':userAddress,'password':password});
     var response=await http.post(loginURL,body:{'address':userAddress,'password':password});
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');   
+    if(response.statusCode==200)
+      {prefs.setString("doctorToken", response.headers['auth-token']);
+      return true;}
+    else 
+      return false;
+
   }
 
   Future<String> _scan() async{
-    final SharedPreferences prefs = await _prefs;
     String scannedString= await scanner.scan();
-    prefs.setString("doctorAddress", scannedString);
     return scannedString;
 
   }
