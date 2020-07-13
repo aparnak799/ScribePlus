@@ -90,6 +90,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_portal:
+    dependency: "direct main"
+    description:
+      name: flutter_portal
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
   flutter_socket_io:
     dependency: "direct main"
     description:
@@ -135,6 +142,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  jiffy:
+    dependency: "direct main"
+    description:
+      name: jiffy
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   logging:
     dependency: transitive
     description:

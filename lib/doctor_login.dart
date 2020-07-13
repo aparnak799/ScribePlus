@@ -40,7 +40,8 @@ class _DoctorLoginState extends State<DoctorLogin> {
   }
 
   Widget scanQRButton(){
-    return RaisedButton.icon(
+    return Center(
+      child: RaisedButton.icon(
       icon: Icon(Icons.photo_camera),
       label: Text("Scan Your QR"),
       onPressed: (){
@@ -51,7 +52,7 @@ class _DoctorLoginState extends State<DoctorLogin> {
         });
         
         }
-    );
+    ));
 
   }
 

@@ -1,13 +1,14 @@
-import 'package:flutter/foundation.dart';
-import 'package:web_socket_channel/io.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:flutter_portal/flutter_portal.dart';
+
+import 'url.dart';
+
 import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:flutter_socket_io/socket_io_manager.dart';
-// import 'package:adhara_socket_io/adhara_socket_io.dart';
-// import 'dart:convert';
-
-const String URI = 'http://13.234.64.136:5000';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:jiffy/jiffy.dart';
 
 class MyHomePage extends StatefulWidget {
   
@@ -17,26 +18,29 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   SocketIO socketIO;
-    @override
+  Map<String,String> response;
+  bool _prescriptionReady;
+  List<bool> isSelected;
+  String questionPicked;
+  DateTime chosenDate;
+  TextEditingController _followDayController= new TextEditingController();
+  
+  @override
   void initState() {
-    //Creating the socket
+    _prescriptionReady=false;
+    questionPicked='Question';
     socketIO = SocketIOManager().createSocketIO(
-     'http://13.234.75.104:5000/',
+     socketUrl,
       '/',
     );
-    //Call init before doing anything with socket
+    isSelected=[false,false,false];
     socketIO.init();
-    //Subscribe to an event to listen to
-    socketIO.subscribe('message', (jsonData) {
-      //Convert the JSON data received into a Map
-      print("DATA FROM SOCKET : "+jsonData);
+    getSharedPrefsSocketID().then((String socketID){
+      socketIO.subscribe(socketID, (jsonResponse) {
+      response=json.decode(jsonResponse);
+      _prescriptionReady=true;
     });
-
-    socketIO.subscribe('1594098288464', (jsonData) {
-      //Convert the JSON data received into a Map
-      print("DATA FROM SOCKET NEW : "+jsonData);
-    });
-    //Connect to the socket
+    });    
     socketIO.connect();
     super.initState();
   }
@@ -47,176 +51,263 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text("Socket"),
       ),
-      body: Text("data"));
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            _prescriptionReady==false?
+              Text("Your prescription is getting ready"):
+              Text("Your Prescription is ready"),
+              RaisedButton.icon(
+              icon: Icon(Icons.skip_next),
+              label: Text("Skip Follow Up"),
+              onPressed: (){
+                print("Goes to Edit Prescription Tab");
+              },
+            ) ,
+            Flexible(
+              child: ListView(
+                children: <Widget>[
+                  this.SetFollowUpWidget()
+                ],
+              ),
+            )
+            ,
+
+            
+          ],
+            ), 
+);
   }
-//   TextEditingController _controller = TextEditingController();
-//   // SocketIO socketIO;
-//   List<String> toPrint = ["trying to connect"];
-//   SocketIOManager manager;
-//   Map<String, SocketIO> sockets = {};
-//   Map<String, bool> _isProbablyConnected = {};
 
-//    @override
-//   void initState() {
-//     super.initState();
-//     manager = SocketIOManager();
-//     initSocket("default");
-//   }
-//   initSocket(String identifier) async {
-//     setState(() => _isProbablyConnected[identifier] = true);
-//     SocketIO socket = await manager.createInstance(SocketOptions(
-//       //Socket IO server URI
-//         URI,
-//         //Enable or disable platform channel logging
-//         enableLogging: false,
-//         transports: [Transports.WEB_SOCKET/*, Transports.POLLING*/] //Enable required transport
-//     ));
-//     socket.onConnect((data) {
-//       pprint("connected...");
-//       pprint("Inside OnConnect: $data");
-//       // socket.emit("disconnect", ["Hey there"]);
-//       socket.on("1594098288464",(data) => print("got Data from Socket : "+data));
-//       // sendMessage(identifier);
-//     });
-//     socket.onConnectError(pprint);
-//     socket.onConnectTimeout(pprint);
-//     socket.onError(pprint);
-//     socket.onDisconnect(pprint);
-//     // socket.on("type:string", (data) => pprint("type:string | $data"));
-//     // socket.on("type:bool", (data) => pprint("type:bool | $data"));
-//     // socket.on("type:number", (data) => pprint("type:number | $data"));
-//     // socket.on("type:object", (data) => pprint("type:object | $data"));
-//     // socket.on("type:list", (data) => pprint("type:list | $data"));
-//     // socket.on("message", (data) => pprint(data));
-    
-//     socket.connect();
-//     sockets[identifier] = socket;
-//   }
-//   bool isProbablyConnected(String identifier){
-//     return _isProbablyConnected[identifier]??false;
-//   }
-
-//   disconnect(String identifier) async {
-//     await manager.clearInstance(sockets[identifier]);
-//     setState(() => _isProbablyConnected[identifier] = false);
-//   }
-//     pprint(data) {
-//     setState(() {
-//       if (data is Map) {
-//         data = json.encode(data);
-//       }
-//       print(data);
-//       toPrint.add(data);
-//     });
-//   }
-//   // IO.Socket socket = IO.io('http://13.234.75.104:5000', <String, dynamic>{
-//   //   'transports': ['websocket'],
-//   //   // 'autoConnect': false,
-
-//   //   // optional
-//   // });
-
-//   //   _connectSocket01() {
-//   //   //update your domain before using
-//   //   /*socketIO = new SocketIO("http://127.0.0.1:3000", "/chat",
-//   //       query: "userId=21031", socketStatusCallback: _socketStatus);*/
-//   //   socketIO = SocketIOManager().createSocketIO("wss://echo.websocket.org","", socketStatusCallback: _socketStatus);
-
-//   //   //call init socket before doing anything
-//   //   socketIO.init();
-
-//   //   //subscribe event
-//   //   // socketIO.subscribe("hello", _onSocketInfo);
-
-//   //   //connect socket
-//   //   socketIO.connect();
-//   // }
-//   // _onSocketInfo(dynamic data) {
-//   //   print("Socket info: " + data);
-//   // }
-
-//   // _socketStatus(dynamic data) {
-//   //   print("Socket status: " + data);
-//   // }
-//   // _reconnectSocket() {
-//   //   if (socketIO == null) {
-//   //     _connectSocket01();
-//   //   } }
-//   // _subscribes() {
-//   //   if (socketIO != null) {
-//   //     socketIO.subscribe("hello", _onReceiveChatMessage);
-//   //   }
-//   // }
-//   // void _onReceiveChatMessage(dynamic message) {
-//   //   print("Message from UFO: " + message);
-//   // }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     bool ipc = isProbablyConnected("default");
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("Socket"),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(20.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: <Widget>[
-//             Form(
-//               child: TextFormField(
-//                 controller: _controller,
-//                 decoration: InputDecoration(labelText: 'Send a message'),
-//               ),
-//             ),
-//             RaisedButton(
-//               child:
-//                   const Text('CONNECT  SOCKET 01', style: TextStyle(color: Colors.white)),
-//               color: Theme.of(context).accentColor,
-//               elevation: 0.0,
-//               splashColor: Colors.blueGrey,
-//               onPressed:
-//                 ipc?null:()=>initSocket("default")
-//                 // socket.connect();
-//                 // _connectSocket01();
-// //                _sendChatMessage(mTextMessageController.text);
-              
-//             ),
-// //             new RaisedButton(
-// //               child: const Text('RECONNECT',
-// //                   style: TextStyle(color: Colors.white)),
-// //               color: Theme.of(context).accentColor,
-// //               elevation: 0.0,
-// //               splashColor: Colors.blueGrey,
-// //               onPressed: () {
-// //                 _reconnectSocket();
-// // //                _sendChatMessage(mTextMessageController.text);
-// //               },
-// //             ),
-//           ],
-//         ),
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: _sendMessage,
-//         tooltip: 'Send message',
-//         child: Icon(Icons.send),
-//       ), // This trailing comma makes auto-formatting nicer for build methods.
-//     );
-//   }
-
-//   void _sendMessage() {
-//     if (_controller.text.isNotEmpty) {
-//   //     widget.channel.stream.listen((message) {
-//   //       widget.channel.sink.add("received!");
-        
-//   // });
-//       // widget.channel.sink.add(_controller.text);
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     // widget.channel.sink.close();
-//     super.dispose();
+  // Widget prescriptionRowWidget(String keyText, String valueTextField, TextEditingController _valueController){
+  //    _valueController.text=valueTextField;
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //     children: <Widget>[
+  //       Text(keyText),
+  //       TextFormField(
+  //         controller: _valueController,
+  //       )
+  //     ],
+  //   );
   // }
+
+  Widget SetFollowUpWidget(){
+    var now = new DateTime.now();
+    
+    print(chosenDate);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Text("Follow Up After: "),
+            NumberIncrementDecrementWidget(_followDayController),
+          ],
+        ),
+          ToggleButtons(
+              children: <Widget>[
+                Text('Day'),
+                Text('Month'),
+                Text('Year'),
+              ],
+              onPressed: (int index) {
+                setState(() {
+                  for (int buttonIndex = 0; buttonIndex < isSelected.length; buttonIndex++) {
+                    if (buttonIndex == index) {
+                      this.isSelected[buttonIndex] = true;
+                    } else {
+                      this.isSelected[buttonIndex] = false;
+                    }
+                  }
+
+                switch (this.isSelected.indexOf(true)) {
+                  case 0: this.chosenDate=Jiffy().add(days: int.parse(_followDayController.text));
+                    
+                    break;
+                  case 1: this.chosenDate=Jiffy().add(months: int.parse(_followDayController.text));
+                    
+                    break;
+                  case 2: this.chosenDate=Jiffy().add(years: int.parse(_followDayController.text));
+                    
+                    break;
+                  default: this.chosenDate=null;
+                }
+                
+
+                });
+              },
+              isSelected: this.isSelected,
+            ),
+            chosenDate!=null?
+            Text("${this.chosenDate.day} ${this.chosenDate.month} ${this.chosenDate.year}"):
+            Text('Date Not Chosen'),
+            QuestionsWidget(),
+            RaisedButton(
+              child: Text("Submit"),
+              onPressed: (){
+                print("Date:${this.chosenDate}");
+                print("Question: $questionPicked");
+
+              },
+            )
+      ],
+    );
+  }
+  Widget QuestionsWidget(){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text("Pick a Question to be asked"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+          Radio(
+            groupValue: questionPicked,
+            value: "Are you feeling better now?",
+            onChanged: (T){
+              print(T);
+              setState(() {
+                this.questionPicked=T;
+              });
+            }
+          ),
+          Text("Are you feeling better now?")
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+          Radio(
+            groupValue: questionPicked,
+            value: "Are the symptoms still present?",
+            onChanged: (T){
+              print(T);
+              setState(() {
+                this.questionPicked=T;
+              });
+            }
+          ),
+          Text("Are the symptoms still present?")
+          ],
+        ),
+        Text("Enter a Custom Question"),
+        Padding(
+          padding: EdgeInsets.all(20.0),
+          child:TextField(
+            autofocus:false,
+            onChanged: (String value){
+              setState(() {
+                this.questionPicked=value;
+              });
+            },
+        ),
+        )
+
+      ],
+    );
+  }
+
+  Widget NumberIncrementDecrementWidget(TextEditingController _followDayController){
+    return 
+    // Text("data");
+    Container(
+      child: Flexible(
+        flex: 2,
+        fit: FlexFit.loose,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+              SizedBox(
+              width: 30.0,
+              child: TextFormField(
+              controller: _followDayController,
+              maxLength: 3,
+              keyboardType: TextInputType.numberWithOptions(
+                signed: true,
+                decimal: false
+              ),
+              validator: (String value){
+                if((int.parse(value)<0) | (int.parse(value)>366)){
+                  _followDayController.text= '0';
+                }
+                return '';
+
+              },
+              ),
+            ),
+            SizedBox(
+              height: 100.0,
+              child:Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.arrow_drop_up),
+                      iconSize: 34,
+                      onPressed: (){
+                        _followDayController.text='${int.parse(_followDayController.text)+1}';
+                        print("Increment");
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.arrow_drop_down),
+                      iconSize: 34,
+                      onPressed: (){
+                        _followDayController.text='${int.parse(_followDayController.text)-1}';
+                        print("Decrement");
+                      },
+                    )
+                  ],
+        ),
+            )
+
+
+          ],
+        ),
+      )
+      
+      );
+      // Row(
+      // // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // children: <Widget>[
+      //   Flexible(
+      //   flex: 1,
+      //   child: TextFormField(
+      //     keyboardType: TextInputType.numberWithOptions(
+      //       signed: true,
+      //       decimal: false
+      //     ),
+      //   )),
+        // Column(
+        //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //   children: <Widget>[
+        //     IconButton(
+        //       icon: Icon(Icons.arrow_drop_up),
+        //       onPressed: (){
+        //         print("Increment");
+        //       },
+        //     ),
+        //     IconButton(
+        //       icon: Icon(Icons.arrow_drop_down),
+        //       onPressed: (){
+        //         print("Decrement");
+        //       },
+        //     )
+        //   ],
+        // )
+      // ],
+    // )
+    // );
+  }
+
+  Future<String> getSharedPrefsSocketID() async{
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    String socketID= _prefs.getString("Socket-Id");
+    _prefs.remove("Socket-Id");
+    return socketID;
+  }
 }
