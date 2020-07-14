@@ -1,46 +1,42 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
+import 'package:flutter_socket_io/flutter_socket_io.dart';
+import 'package:flutter_socket_io/socket_io_manager.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'url.dart';
 
-import 'package:flutter_socket_io/flutter_socket_io.dart';
-import 'package:flutter_socket_io/socket_io_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:jiffy/jiffy.dart';
 
-class MyHomePage extends StatefulWidget {
+class FollowUpPage extends StatefulWidget {
   
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _FollowUpPageState createState() => _FollowUpPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _FollowUpPageState extends State<FollowUpPage> {
   SocketIO socketIO;
-  Map<String,String> response;
+  var response;
+  var prescription;
   bool _prescriptionReady;
   List<bool> isSelected;
   String questionPicked;
   DateTime chosenDate;
   TextEditingController _followDayController= new TextEditingController();
-  
+
+
   @override
   void initState() {
     _prescriptionReady=false;
     questionPicked='Question';
-    socketIO = SocketIOManager().createSocketIO(
-     socketUrl,
-      '/',
-    );
     isSelected=[false,false,false];
+    socketIO = SocketIOManager().createSocketIO(socketUrl,'/');
     socketIO.init();
     getSharedPrefsSocketID().then((String socketID){
-      socketIO.subscribe(socketID, (jsonResponse) {
-      response=json.decode(jsonResponse);
-      _prescriptionReady=true;
-    });
-    });    
+      getPrescription(socketID);
+    });   
     socketIO.connect();
     super.initState();
   }
@@ -55,8 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             _prescriptionReady==false?
-              Text("Your prescription is getting ready"):
-              Text("Your Prescription is ready"),
+              gettingReadyNotificationWidget():
+              readyNotificationWidget(),
               RaisedButton.icon(
               icon: Icon(Icons.skip_next),
               label: Text("Skip Follow Up"),
@@ -67,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Flexible(
               child: ListView(
                 children: <Widget>[
-                  this.SetFollowUpWidget()
+                  this.setFollowUpWidget()
                 ],
               ),
             )
@@ -79,22 +75,45 @@ class _MyHomePageState extends State<MyHomePage> {
 );
   }
 
-  // Widget prescriptionRowWidget(String keyText, String valueTextField, TextEditingController _valueController){
-  //    _valueController.text=valueTextField;
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-  //     children: <Widget>[
-  //       Text(keyText),
-  //       TextFormField(
-  //         controller: _valueController,
-  //       )
-  //     ],
-  //   );
-  // }
+  Widget gettingReadyNotificationWidget(){
+    return LayoutBuilder(
+      builder: (BuildContext context,BoxConstraints constraints){
+        return Container(
+        height: MediaQuery.of(context).size.height * 0.05,
+        width: constraints.maxWidth,
+        color: Colors.lightGreen,
+        child: Text("Your prescription is getting ready")
+      );
+      },
+    );
+  }
 
-  Widget SetFollowUpWidget(){
-    var now = new DateTime.now();
-    
+  Widget readyNotificationWidget(){
+    return LayoutBuilder(
+      builder: (BuildContext context,BoxConstraints constraints){
+        return Container(
+        height: MediaQuery.of(context).size.height * 0.05,
+        width: constraints.maxWidth,
+        color: Colors.lightGreen,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text("Your Prescription is ready"),
+            FlatButton(
+              child: Text("View"),
+              onPressed: (){
+                socketIO.disconnect();
+                print(prescription);},
+            )
+          ],
+        )
+      );
+      },
+    );
+  }
+
+  Widget setFollowUpWidget(){
+   
     print(chosenDate);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -103,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             Text("Follow Up After: "),
-            NumberIncrementDecrementWidget(_followDayController),
+            numberIncrementDecrementWidget(_followDayController),
           ],
         ),
           ToggleButtons(
@@ -143,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
             chosenDate!=null?
             Text("${this.chosenDate.day} ${this.chosenDate.month} ${this.chosenDate.year}"):
             Text('Date Not Chosen'),
-            QuestionsWidget(),
+            questionsWidget(),
             RaisedButton(
               child: Text("Submit"),
               onPressed: (){
@@ -155,7 +174,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
   }
-  Widget QuestionsWidget(){
+
+  Widget questionsWidget(){
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -211,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget NumberIncrementDecrementWidget(TextEditingController _followDayController){
+  Widget numberIncrementDecrementWidget(TextEditingController _followDayController){
     return 
     // Text("data");
     Container(
@@ -271,43 +291,27 @@ class _MyHomePageState extends State<MyHomePage> {
       )
       
       );
-      // Row(
-      // // mainAxisAlignment: MainAxisAlignment.spaceAround,
-      // children: <Widget>[
-      //   Flexible(
-      //   flex: 1,
-      //   child: TextFormField(
-      //     keyboardType: TextInputType.numberWithOptions(
-      //       signed: true,
-      //       decimal: false
-      //     ),
-      //   )),
-        // Column(
-        //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //   children: <Widget>[
-        //     IconButton(
-        //       icon: Icon(Icons.arrow_drop_up),
-        //       onPressed: (){
-        //         print("Increment");
-        //       },
-        //     ),
-        //     IconButton(
-        //       icon: Icon(Icons.arrow_drop_down),
-        //       onPressed: (){
-        //         print("Decrement");
-        //       },
-        //     )
-        //   ],
-        // )
-      // ],
-    // )
-    // );
+  }
+
+    Future<void> getPrescription(String socketID) async{      
+      return await socketIO.subscribe(socketID, (jsonResponse) {
+      print("Inside Subscribe");
+      response=json.decode(jsonResponse);
+      print(response);
+      setState(() {
+        _prescriptionReady=true;
+        prescription=new Map();
+        prescription['Disease']=json.decode(jsonResponse)['disease'];
+        prescription['Drugs']=json.decode(jsonResponse)['drug'];
+      });
+    });
+    
   }
 
   Future<String> getSharedPrefsSocketID() async{
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     String socketID= _prefs.getString("Socket-Id");
     _prefs.remove("Socket-Id");
-    return socketID;
+    return "1594098288464";//Change Socket ID
   }
 }
