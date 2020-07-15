@@ -2,6 +2,8 @@ import 'dart:io' as io;
 import 'dart:core';
 import 'dart:convert';
 
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+
 import 'url.dart';
 
 import 'package:flutter/material.dart';
@@ -13,26 +15,24 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class UploadAudioPrescription extends StatefulWidget {
-
   final LocalFileSystem localFileSystem;
   UploadAudioPrescription({localFileSystem})
       : this.localFileSystem = localFileSystem ?? LocalFileSystem();
   @override
-  _UploadAudioPrescriptionState createState() => new _UploadAudioPrescriptionState();
+  _UploadAudioPrescriptionState createState() =>
+      new _UploadAudioPrescriptionState();
 }
-
 
 class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
   bool _isRecording = false;
   Recording _recording;
   PermissionStatus _permissionStatus = PermissionStatus.undetermined;
-  Permission _permission=Permission.speech;
+  Permission _permission = Permission.speech;
   String _audioFullPath;
   TextEditingController _controller = new TextEditingController();
   String _uploadResponseStatus;
+  int _currentIndex = 0;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -42,36 +42,68 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
     requestPermission(_permission);
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
-    return new Center(
-      child: new Padding(
-        padding: new EdgeInsets.all(8.0),
-        child: new Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              new FlatButton(
-                onPressed: _isRecording ? null : _start,
-                child: new Text("Start"),
-                color: Colors.green,
-              ),
-              new FlatButton(
-                onPressed: _isRecording ? _stop : null,
-                child: new Text("Stop"),
-                color: Colors.red,
-              ),
-              new RaisedButton(
-                child: new Text("Send Data"),
-                onPressed: () async {
-                  var reasonPhrase = await uploadAudio();
-                  setState(() {
-                    _uploadResponseStatus = reasonPhrase;
-                    print(reasonPhrase);
-                  });
-                },
-              )
-
-            ]),
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      body: new Center(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                new IconButton(
+                    icon: Icon(Icons.play_arrow),
+                    iconSize: 100,
+                    onPressed: _isRecording ? null : _start,
+                    tooltip: "Start"),
+                /*new FlatButton(
+                  onPressed: _isRecording ? _stop : null,
+                  child: new Text("Stop"),
+                  color: Colors.red,
+                ),
+                new RaisedButton(
+                  child: new Text("Send Data"),
+                  onPressed: () async {
+                    var reasonPhrase = await uploadAudio();
+                    setState(() {
+                      _uploadResponseStatus = reasonPhrase;
+                      print(reasonPhrase);
+                    });
+                  },
+                )*/
+              ]),
+        ),
+      ),
+      bottomNavigationBar: new Theme(
+        data: Theme.of(context).copyWith(
+            canvasColor: Colors.blue[100],
+            primaryColor: Colors.white,
+            textTheme: Theme.of(context)
+                .textTheme
+                .copyWith(caption: new TextStyle(color: Colors.white))),
+        child: new BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: 0,
+          items: [
+            new BottomNavigationBarItem(
+              icon: new Icon(Icons.home),
+              title: new Text("Home"),
+            ),
+            new BottomNavigationBarItem(
+              icon: new Icon(Icons.crop_free),
+              title: new Text("Scan QR Code"),
+            ),
+            new BottomNavigationBarItem(
+              icon: new Icon(Icons.mic),
+              title: new Text("Record"),
+            ),
+            new BottomNavigationBarItem(
+              icon: new Icon(Icons.person),
+              title: new Text("Profile"),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -79,41 +111,39 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
   Future<void> requestPermission(Permission permission) async {
     final status = await permission.request();
     setState(() {
-       _permissionStatus = status;
+      _permissionStatus = status;
       print(_permissionStatus);
     });
-  }//Request permissions for Audio
+  } //Request permissions for Audio
 
   Future<String> uploadAudio() async {
-  var request = http.MultipartRequest('POST', Uri.parse('$apiUrl/doctor/upload/audio'));
-  final SharedPreferences prefs = await _prefs;
-  print("Path"+_audioFullPath);
-  request.files.add(
-    await http.MultipartFile.fromPath(
-      'file',
-      _audioFullPath
-    )
-  );
-  var streamedResponse = await request.send();
-  var response=await streamedResponse.stream.bytesToString();
-  var parsedJson = json.decode(response);
-  prefs.setString("Socket-ID", parsedJson['socketID']);
-  // return parsedJson['socketID'];
-  return streamedResponse.reasonPhrase;
+    var request =
+        http.MultipartRequest('POST', Uri.parse('$apiUrl/doctor/upload/audio'));
+    final SharedPreferences prefs = await _prefs;
+    print("Path" + _audioFullPath);
+    request.files
+        .add(await http.MultipartFile.fromPath('file', _audioFullPath));
+    var streamedResponse = await request.send();
+    var response = await streamedResponse.stream.bytesToString();
+    var parsedJson = json.decode(response);
+    prefs.setString("Socket-ID", parsedJson['socketID']);
+    // return parsedJson['socketID'];
+    return streamedResponse.reasonPhrase;
   }
 
   _start() async {
     try {
-      if (_permissionStatus==PermissionStatus.granted) {     
+      if (_permissionStatus == PermissionStatus.granted) {
         io.Directory appDocDirectory = await getApplicationDocumentsDirectory();
-        String filename= new DateTime.now().millisecondsSinceEpoch.toString() + '.mp4';
-        String path = appDocDirectory.path + '/' +filename;
+        String filename =
+            new DateTime.now().millisecondsSinceEpoch.toString() + '.mp4';
+        String path = appDocDirectory.path + '/' + filename;
         await AudioRecorder.start(
             path: path, audioOutputFormat: AudioOutputFormat.AAC);
-        
+
         bool isRecording = await AudioRecorder.isRecording;
         setState(() {
-          _audioFullPath=path;
+          _audioFullPath = path;
           _recording = new Recording(duration: new Duration(), path: "");
           _isRecording = isRecording;
         });
@@ -138,6 +168,4 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
     });
     _controller.text = recording.path;
   }
-  
 }
-
