@@ -135,6 +135,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  jiffy:
+    dependency: "direct main"
+    description:
+      name: jiffy
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   logging:
     dependency: transitive
     description:
@@ -247,6 +254,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.13"
+  qrscan:
+    dependency: "direct main"
+    description:
+      name: qrscan
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.17"
   quiver:
     dependency: transitive
     description:
