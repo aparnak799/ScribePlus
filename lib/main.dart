@@ -1,11 +1,6 @@
+import 'package:ScribePlus/screens/doctor_login.dart';
 import 'package:ScribePlus/screens/scan_patient.dart';
 import 'package:flutter/material.dart';
-import 'socket.dart';
-import 'add_prescription.dart';
-import 'doctor_login.dart';
-
-
-
 
 void main() => runApp(MyApp());
 
@@ -15,10 +10,7 @@ class MyApp extends StatelessWidget {
     final title = 'Scribe Plus';
     return MaterialApp(
       title: title,
-      home:
-      FollowUpPage()
-      // DoctorLogin()
-      // UploadAudioPrescription()      
+      home:DoctorLogin()    
     ); 
     
   }
