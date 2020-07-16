@@ -64,11 +64,15 @@ class ViewPatient extends StatefulWidget {
 
 class _ViewPatientState extends State<ViewPatient> {  
   String patientAddress;
-  Future<Patient> patientDetails;
+  Future patientDetails;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   _ViewPatientState(this.patientAddress);
   String doctorAddress;
   String authToken;
+  String otp;
+  String enteredOtp;
+  bool newPatient=false;
+   final GlobalKey<ScaffoldState> _viewPatientScaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
