@@ -1,4 +1,5 @@
 import 'package:ScribePlus/screens/doctor_login.dart';
+import 'package:ScribePlus/screens/processing_prescription.dart';
 import 'package:ScribePlus/screens/scan_patient.dart';
 import 'package:flutter/material.dart';
 

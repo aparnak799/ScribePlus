@@ -72,15 +72,16 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
               new RaisedButton(
                 child: new Text("Send Data"),
                 onPressed: (){
-                    uploadAudio().then((socketEvent){
-                      if(socketEvent!='')
-                        Navigator.pushReplacement(context, new MaterialPageRoute(builder: (context) => FollowUp(patientAddress:this.patientAddress,socketEvent: socketEvent)));
-                      else 
-                        {
-                          final SnackBar snackBar=SnackBar(content:Text('Could not process audio'));
-                          _scaffoldKey.currentState.showSnackBar(snackBar);
-                        }
-                    });
+                  // Navigator.pushReplacement(context, new MaterialPageRoute(builder: (context) => FollowUp(patientAddress:this.patientAddress,socketEvent: '1594885789066')));
+                  uploadAudio().then((socketEvent){
+                    if(socketEvent!='')
+                      Navigator.pushReplacement(context, new MaterialPageRoute(builder: (context) => FollowUp(patientAddress:this.patientAddress,socketEvent: socketEvent)));
+                    else 
+                      {
+                        final SnackBar snackBar=SnackBar(content:Text('Could not process audio'));
+                        _scaffoldKey.currentState.showSnackBar(snackBar);
+                      }
+                  });
                 },
               )
 
@@ -112,10 +113,10 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
   var response=await streamedResponse.stream.bytesToString();
   var parsedJson = json.decode(response);
   print(parsedJson);
-  print(parsedJson['socketID']);
+  print(parsedJson['socketId']);
   prefs.setString("Socket-ID", parsedJson['socketID']);
   // return parsedJson['socketID'];
-  return parsedJson['socketID'];
+  return parsedJson['socketId'];
   }
 
   _start() async {

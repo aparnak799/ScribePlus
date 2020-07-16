@@ -15,15 +15,21 @@ class _EditPrescriptionState extends State<EditPrescription> {
   String patientAddress;
   TextEditingController diagnosisController;
   TextEditingController medicinesController;
-
+  TextEditingController symptomsController;
+  TextEditingController adviceController;
+  _EditPrescriptionState(this.patientAddress,this.prescription);
   @override
   void initState() { 
-    diagnosisController.text=prescription['Disease'];
-    medicinesController.text=prescription['Drugs'];
+    print('Prescription: $prescription');
+    print('Patient address: $patientAddress');
+    diagnosisController=new TextEditingController(text: prescription['Disease']);
+    medicinesController=new TextEditingController(text: prescription['Drugs']);
+    symptomsController=new TextEditingController(text: prescription['Symptoms']);
+    adviceController=new TextEditingController();
     super.initState();
     
   }
-  _EditPrescriptionState(patientAddress,prescription);
+  
   @override
   Widget build(BuildContext context) {
     // double width=MediaQuery.of(context).size.width;
@@ -36,7 +42,21 @@ class _EditPrescriptionState extends State<EditPrescription> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           prescriptionRowWidget('Diagnosis',diagnosisController),
-          prescriptionRowWidget('Medicines',medicinesController)
+          prescriptionRowWidget('Medicines',medicinesController),
+          prescriptionRowWidget('Symptoms', symptomsController),
+          prescriptionRowWidget('Advice', adviceController),
+          RaisedButton.icon(
+            icon: Icon(Icons.send),
+            label: Text("Generate Report"),
+            onPressed: (){
+              print({
+                'Diagnosis':diagnosisController.text,
+                'Medicines':medicinesController.text,
+                'Symptoms':medicinesController.text,
+                'Advice':adviceController.text
+              });
+            },
+          )
 
         ],
       

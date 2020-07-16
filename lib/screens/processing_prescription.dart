@@ -43,6 +43,7 @@ class _FollowUpState extends State<FollowUp> {
     isSelected=[false,false,false];
     socketIO = SocketIOManager().createSocketIO(socketUrl,'/');
     socketIO.init();
+    print('socketEvent: $socketEvent');
     getPrescription();
     // getSharedPrefsSocketID().then((String socketID){
     //   getPrescription(socketID);
@@ -323,15 +324,16 @@ class _FollowUpState extends State<FollowUp> {
   }
 
     Future<void> getPrescription() async{      
+      // print(this.socketEvent);
       return await socketIO.subscribe(this.socketEvent, (jsonResponse) {
       print("Inside Subscribe");
       response=json.decode(jsonResponse);
       print(response);
       setState(() {
         _prescriptionReady=true;
-        prescription=new Map();
-        prescription['Disease']=json.decode(jsonResponse)['disease'];
-        prescription['Drugs']=json.decode(jsonResponse)['drug'];
+        prescription={'Disease':response['disease'],
+                      'Drugs':response['drug'],
+                      'Symptoms':response['symptoms']};
       });
     });
     
