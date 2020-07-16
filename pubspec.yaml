@@ -31,6 +31,7 @@ dependencies:
   http: ^0.12.1
   qrscan: ^0.2.17
   jiffy: ^3.0.1
+  pin_entry_text_field: ^0.1.4
   # overlay_support: ^1.0.4
   flutter_portal: ^0.1.0
 

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ScribePlus/url.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pin_entry_text_field/pin_entry_text_field.dart';
+
 
 class Prescription{
   final String prescriptionID;
@@ -91,8 +93,10 @@ class _ViewPatientState extends State<ViewPatient> {
 
   @override
   Widget build(BuildContext context) {
+   
     print(patientAddress);
     return Scaffold(
+      key: _viewPatientScaffoldKey,
       appBar: AppBar(
         leading: IconButton(
           icon:Icon(Icons.arrow_back_ios),
@@ -117,24 +121,52 @@ class _ViewPatientState extends State<ViewPatient> {
         }
         else if(snapshot.hasData){
           print('Snapshot Data: ${snapshot.data}');
-          return Scaffold(
-            body: ListView(
-            children: <Widget>[
-              Text(snapshot.data.name),
-              Text(snapshot.data.email),
-              Text(snapshot.data.phone)
-            ],
-          ),
-          floatingActionButton:FloatingActionButton(
-                backgroundColor: Colors.lightBlueAccent,
-                child: Icon(Icons.add),
-                onPressed: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>new UploadAudioPrescription(patientAddress: this.patientAddress)));
-                  print("Go to add prescription");
-                },
+          if(snapshot.data is Patient)
+            return Scaffold(
+              body: ListView(
+              children: <Widget>[
+                Text(snapshot.data.name),
+                Text(snapshot.data.email),
+                Text(snapshot.data.phone)
+              ],
+            ),
+            floatingActionButton:FloatingActionButton(
+                  backgroundColor: Colors.lightBlueAccent,
+                  child: Icon(Icons.add),
+                  onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>new UploadAudioPrescription(patientAddress: this.patientAddress)));
+                    print("Go to add prescription");
+                  },
+                ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            );
+          else if(snapshot.data is String)
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  PinEntryTextField(
+              fields: 6,
+              showFieldAsBox: false,
+              onSubmit: (String pin){
+                print('Pin: $pin');
+                if(pin==snapshot.data){
+                  allowPatientAccess().then((bool result){
+                    if(result==true){
+                      setState(() {
+                        patientDetails=getPatientDetails(this.doctorAddress, this.authToken);
+                      });
+                    }
+                    else{
+                      final SnackBar snackBar=SnackBar(content:Text('Login Failed'));
+                      _viewPatientScaffoldKey.currentState.showSnackBar(snackBar);
+                    }
+                  });
+                }
+              },
+            )
+                ],
               ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          );
+            );
 
         }
         print(snapshot.connectionState);
@@ -156,7 +188,7 @@ class _ViewPatientState extends State<ViewPatient> {
     );
   }
 
-  Future<Patient> getPatientDetails(String doctorAddress, String authToken) async{
+  Future getPatientDetails(String doctorAddress, String authToken) async{
     print('patient adrress  ${this.patientAddress}');
     final http.Response response = await http.post(
       '$apiUrl/patient/details',
@@ -173,9 +205,31 @@ class _ViewPatientState extends State<ViewPatient> {
     print(response.body);
     if (response.statusCode==200) {
       return Patient.fromJson(json.decode(response.body)['patient']);
-    } else {
+    }
+    else if(response.statusCode==401){
+      return json.decode(response.body)['OTP'];
+    } 
+    else 
+    {
       throw Exception('Failed to load patient details');
     }
+  }
+  Future<bool> allowPatientAccess() async{
+    final http.Response response = await http.post(
+      '$apiUrl/patient/prescription/access',
+      headers: <String,String>{
+        'Content-Type': 'application/json',
+        'auth-token': authToken
+      },
+      body: jsonEncode(<String,String>{
+        'patientQrCode':patientAddress.toString(),
+        'address':doctorAddress
+      })
+    );
+    if(response.statusCode==200){
+      return true;
+    }
+    return false;
   }
   Future<Map<String,String>> getAuthTokenAndAddress() async{
     final SharedPreferences prefs = await _prefs;
