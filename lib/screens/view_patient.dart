@@ -30,7 +30,7 @@ class Patient{
   Patient({this.name,this.id,this.email,this.phone,this.doctorsVisitedCount,this.prescriptions});
 
   factory Patient.fromJson(Map<String,dynamic> response){
-    List<Prescription> prescriptionsList;
+    List<Prescription> prescriptionsList=new List<Prescription>();
     for (var prescriptionItem in response['prescriptions']) {
       Prescription prescription=Prescription(
         prescriptionID: prescriptionItem['prescriptionID'],
@@ -127,7 +127,10 @@ class _ViewPatientState extends State<ViewPatient> {
               children: <Widget>[
                 Text(snapshot.data.name),
                 Text(snapshot.data.email),
-                Text(snapshot.data.phone)
+                Text(snapshot.data.phone),
+                for(var prescription in snapshot.data.prescriptions)
+                  prescriptionCard(prescription),
+
               ],
             ),
             floatingActionButton:FloatingActionButton(
@@ -188,6 +191,19 @@ class _ViewPatientState extends State<ViewPatient> {
     );
   }
 
+  Widget prescriptionCard(Prescription prescription){
+    return Card(
+      borderOnForeground: true,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Text(prescription.date),
+          Text('Diagnosis: ${prescription.diagnosis}'),
+          Text('Treated by: ${prescription.doctorName}')
+        ],
+      ),
+    );
+  }
   Future getPatientDetails(String doctorAddress, String authToken) async{
     print('patient adrress  ${this.patientAddress}');
     final http.Response response = await http.post(
