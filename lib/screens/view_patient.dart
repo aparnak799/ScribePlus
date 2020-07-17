@@ -74,7 +74,7 @@ class _ViewPatientState extends State<ViewPatient> {
   String otp;
   String enteredOtp;
   bool newPatient=false;
-   final GlobalKey<ScaffoldState> _viewPatientScaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _viewPatientScaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -213,7 +213,7 @@ class _ViewPatientState extends State<ViewPatient> {
         'auth-token': authToken
       },
       body: jsonEncode(<String,String>{
-        'patientQrCode':patientAddress.toString(),
+        'patientQrCode':this.patientAddress,
         'address':doctorAddress
       })
     );

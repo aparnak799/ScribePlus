@@ -1,6 +1,7 @@
 import 'package:ScribePlus/screens/doctor_login.dart';
 import 'package:ScribePlus/screens/processing_prescription.dart';
 import 'package:ScribePlus/screens/scan_patient.dart';
+import 'package:ScribePlus/screens/view_appointments.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -25,7 +26,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin{
   int selectedIndex = 0;
   final widgetOptions = [
-    Text('View Appointments'),
+    ViewAppointments(),
     ScanPatient(),
     Text('Upload Call'),
     Text('Profile')
