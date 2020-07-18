@@ -20,6 +20,7 @@ dependencies:
   flutter:
     sdk: flutter
   audio_recorder: ^1.0.2
+  flutter_svg: ^0.17.1
   web_socket_channel: ^1.1.0
   permission_handler: ^5.0.1+1
   path_provider: ^1.6.11
@@ -49,7 +50,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
+  assets:
+    - assets/images/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
