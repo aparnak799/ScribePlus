@@ -28,7 +28,8 @@ class _DoctorLoginState extends State<DoctorLogin> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return MaterialApp(
+        home: Container(
       color: Colors.white,
       child: Column(children: <Widget>[
         Padding(
@@ -77,7 +78,10 @@ class _DoctorLoginState extends State<DoctorLogin> {
                   borderRadius: BorderRadius.circular(10.0),
                   side: BorderSide(color: Colors.lightGreenAccent[400])),
               onPressed: () {
-                scanQRButton();
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => scanQRButton()));
               },
               color: Colors.lightGreenAccent[400],
             ),
@@ -89,7 +93,10 @@ class _DoctorLoginState extends State<DoctorLogin> {
                   borderRadius: BorderRadius.circular(10.0),
                   side: BorderSide(color: Colors.lightGreenAccent[400])),
               onPressed: () {
-                postScanWidget();
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => postScanWidget()));
               },
               color: Colors.lightGreenAccent[400],
             )
@@ -136,7 +143,7 @@ class _DoctorLoginState extends State<DoctorLogin> {
           ),
         ),
       ]),
-    );
+    ));
   }
 
   Widget scanQRButton() {
