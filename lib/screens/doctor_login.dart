@@ -62,7 +62,6 @@ class _DoctorLoginState extends State<DoctorLogin> {
                   style: TextStyle(
                     fontSize: 20.0,
                     color: Colors.black,
-                    fontFamily: 'Montserrat',
                   )),
             ]),
           ),
@@ -102,46 +101,41 @@ class _DoctorLoginState extends State<DoctorLogin> {
             )
           ],
         ),
-        Padding(
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Positioned(
-                width: 71,
-                height: 30,
-                top: 30,
-                left: 71,
-                child: Transform.rotate(
-                  angle: 180 * (3.14 / 180),
-                  child: SvgPicture.asset('assets/images/vector.svg',
-                      semanticsLabel: 'vector'),
-                )),
-          ),
-          padding: EdgeInsets.only(right: 30),
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: 30),
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Positioned(
-                top: 4,
-                left: 0,
-                child: Transform.rotate(
-                  angle: -3.0617613445625937e-22 * (3.14 / 180),
-                  child: Text(
-                    'next',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        color: Color.fromRGBO(24, 199, 99, 1),
-                        fontFamily: 'Montserrat',
-                        fontSize: 18,
-                        letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
-                        fontWeight: FontWeight.normal,
-                        height: 1),
-                  ),
-                )),
-          ),
-        ),
+        InkWell(
+            child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: Container(
+                    width: 71,
+                    height: 30,
+                    child: Stack(children: <Widget>[
+                      Positioned(
+                          top: 30,
+                          left: 71,
+                          child: Transform.rotate(
+                            angle: 180 * (3.14 / 180),
+                            child: SvgPicture.asset('assets/images/vector.svg',
+                                semanticsLabel: 'vector'),
+                          )),
+                      Positioned(
+                          top: 4,
+                          left: 0,
+                          child: Transform.rotate(
+                            angle: -3.0617613445625937e-22 * (3.14 / 180),
+                            child: Text(
+                              'next',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  color: Color.fromRGBO(24, 199, 99, 1),
+                                  fontFamily: 'Montserrat',
+                                  fontSize: 18,
+                                  letterSpacing:
+                                      0 /*percentages not used in flutter. defaulting to zero*/,
+                                  fontWeight: FontWeight.normal,
+                                  height: 1),
+                            ),
+                          )),
+                    ]))))
       ]),
     ));
   }
