@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:ScribePlus/screens/scan_patient.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
@@ -9,51 +11,74 @@ import 'package:http/http.dart' as http;
 import 'package:ScribePlus/url.dart';
 import 'package:intl/intl.dart';
 
-class Patient{
+class Patient {
   final String name;
   final String phNo;
   final String patientId;
   final String email;
 
-  Patient({this.name,this.phNo,this.patientId,this.email});
+  Patient({this.name, this.phNo, this.patientId, this.email});
 
-  factory Patient.fromJson(Map<String,dynamic> responsePatient){
+  factory Patient.fromJson(Map<String, dynamic> responsePatient) {
     return Patient(
-      name: responsePatient['name'],
-      phNo: responsePatient['phone'],
-      email: responsePatient['email']
-    );
+        name: responsePatient['name'],
+        phNo: responsePatient['phone'],
+        email: responsePatient['email']);
   }
 }
 
-class Appointment{
+class Appointment {
   final int appointmentNo;
   final String time;
   // final String date;
   final Patient patientDetails;
   final bool isNewPatient;
   final String patientQrCode;
+  final String date;
+  // final DateTime timeChosen;
+  Appointment(
+      {this.appointmentNo,
+      this.time,
+      this.patientDetails,
+      this.isNewPatient,
+      this.patientQrCode,
+      this.date});
 
-  Appointment({this.appointmentNo,this.time,this.patientDetails,this.isNewPatient, this.patientQrCode});
-
-  factory Appointment.fromJson(Map<String,dynamic> response){
+  factory Appointment.fromJson(Map<String, dynamic> response) {
     return Appointment(
       appointmentNo: response['appointment']['appointmentNumber'],
       time: response['appointment']['time'],
       patientDetails: Patient.fromJson(response['patientDetails']),
       isNewPatient: response['isNewPatient'],
-      patientQrCode: response['appointment']['patientQrCode']
-      // date: response['date']
+      patientQrCode: response['appointment']['patientQrCode'],
+      date: response['appointment']['date'],
+      // timeChosen: DateTime.parse(response['appointmentTime'])
     );
   }
-
 }
 
-List<Appointment> initAppointments(var response){
-  List<Appointment> appointmentsList= new List();
+double toDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
+
+List<Appointment> initAppointments(var response) {
+  List<Appointment> appointmentsList = new List();
   for (var appointment in response) {
-    appointmentsList.add(Appointment.fromJson(appointment));    
+    appointmentsList.add(Appointment.fromJson(appointment));
   }
+  // appointmentsList.sort((a,b){
+  //   // print(DateTime.now());
+  //   // print(DateTime.parse(a.date.substring(0,10)+'T'+ a.time));
+  //   // print(DateTime.parse(b.date.substring(0,10)+'T'+ b.time));
+  //   // print(DateTime.parse(b.date.substring(0,10)+'T'+ b.time) is DateTime);
+  //   // final DateFormat formatter = DateFormat('HOUR24_MINUTE_SECOND');
+  //   // DateFormat.Hms().format(DateTime.parse(a.date+' '+ a.time));
+  //   // String formattedA = DateFormat.Hms().format(DateTime.parse(a.date.substring(0,10)+'T'+ a.time+'.000Z'));
+  //   // String formattedB = DateFormat.Hms().format(DateTime.parse(b.date.substring(0,10)+'T'+ b.time+'.000Z'));
+  //   print(a.timeChosen);
+  //   print(b.timeChosen);
+  //   double timeA=toDouble(TimeOfDay.fromDateTime(a.timeChosen));
+  //   double timeB=toDouble(TimeOfDay.fromDateTime(b.timeChosen));
+  //   return timeA.compareTo(timeB);
+  // });
   return appointmentsList;
 }
 
@@ -67,21 +92,22 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
   Future appointments;
   String doctorAddress;
   String authToken;
-  DateTime selectedDate=DateTime.now();
+  DateTime selectedDate = DateTime.now();
   var newFormat = DateFormat("yyyy-MM-dd");
 
-  final GlobalKey<ScaffoldState> _viewAppointmentsScaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _viewAppointmentsScaffoldKey =
+      new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    getAuthTokenAndAddress().then((details){
+    getAuthTokenAndAddress().then((details) {
       setState(() {
-        doctorAddress=details['doctorAddress'];
-        authToken=details['authToken'];
-        appointments=getAppointments(this.doctorAddress,this.authToken,newFormat.format(this.selectedDate));
+        doctorAddress = details['doctorAddress'];
+        authToken = details['authToken'];
+        appointments = getAppointments(this.doctorAddress, this.authToken,
+            newFormat.format(this.selectedDate));
       });
-      
     });
   }
 
@@ -89,56 +115,68 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _viewAppointmentsScaffoldKey,
-      body: getAppointmentsWidget(),      
+      body: getAppointmentsWidget(),
     );
   }
 
-  Widget getAppointmentsWidget(){
+  Widget getAppointmentsWidget() {
     return FutureBuilder(
       future: appointments,
-      builder: (context,snapshot){
-        if(snapshot.hasError){          
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
           return errorWidget(snapshot.error.toString());
-        }
-        else if(snapshot.connectionState==ConnectionState.done && snapshot.hasData==false){
+        } else if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData == false) {
           return errorWidget('No Data');
-        }
-        else if(snapshot.hasData){
-          if(snapshot.data is List<Appointment>)
-            {print(snapshot.data);
+        } else if (snapshot.hasData) {
+          if (snapshot.data is List<Appointment>) {
+            print(snapshot.data);
             return ListView(
               children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                Text('Appointments'),
-                IconButton(
-                icon: Icon(Icons.calendar_today),
-                onPressed: (){
-                  pickDate();
-                },
-              ),
-                  ],
+                Align(
+                  alignment: Alignment.centerRight,
+                  child:                 IconButton(
+                  icon: Icon(Icons.calendar_today, size: 38,),
+                  onPressed: () {
+                    pickDate();
+                  },
                 ),
-
-                for(Appointment appointment in snapshot.data)
-                  appointmentCardWidget(appointment),
+                ),
+                Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      'Your Appointments for: ${DateFormat("yMMMMEEEEd").format(selectedDate)}',
+                      style: TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 1),
+                          fontFamily: 'Roboto',
+                          fontSize: 36,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1),
+                    )),
+                firstAppointment(snapshot.data[0]),
+                // firstAppointmentWidget(snapshot.data[0]),
+                Center(child: Text('Next Appointments')),
+                for (Appointment appointment in snapshot.data.sublist(1))
+                  nextAppointmentWidget(appointment),
               ],
-            );}
+            );
+          }
           return ListView(
             children: <Widget>[
               Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                Text('Appointments'),
-                IconButton(
-                icon: Icon(Icons.calendar_today),
-                onPressed: (){
-                  pickDate();
-                },
+                  Text('Appointments'),
+                  IconButton(
+                    icon: Icon(Icons.calendar_today),
+                    onPressed: () {
+                      pickDate();
+                    },
+                  ),
+                ],
               ),
-                  ],
-                ),
               Center(child: Text("No Appointments")),
             ],
           );
@@ -147,95 +185,271 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
       },
     );
   }
-  Widget errorWidget(String error){
+
+  Widget errorWidget(String error) {
     return Center(
       child: Text(error),
     );
   }
 
-  Widget loadingWidget(){
+  Widget loadingWidget() {
     return Center(
       child: Text("Loading"),
     );
   }
 
-  Widget appointmentCardWidget(Appointment appointment){
+  Widget firstAppointment(Appointment appointment) {
+    Widget common = Column(
+      children: <Widget>[
+        Container(
+            constraints: BoxConstraints.expand(
+                width: MediaQuery.of(context).size.width * 0.95,
+                height: MediaQuery.of(context).size.height * 0.1),
+            margin: EdgeInsets.only(top: 20.0, right: 20.0, left: 20.0),
+            decoration: BoxDecoration(
+                color: Color(0xFF18C763),
+                shape: BoxShape.rectangle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black,
+                    blurRadius: 2.0,
+                    spreadRadius: 0.0,
+                    offset: Offset(2.0, 2.0), // shadow direction: bottom right
+                  )
+                ],
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0))),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Text('Current Appointment'),
+                  Text(appointment.time),
+                ],
+              ),
+            )),
+        Container(
+            margin: EdgeInsets.only(bottom: 20),
+            child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    appointment.patientDetails.name,
+                    style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 18,
+                        letterSpacing:
+                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        fontWeight: FontWeight.normal,
+                        height: 1),
+                  ),
+                  if (!appointment.isNewPatient)
+                    RaisedButton(
+                      child: Text('View Patient History'),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => new ViewPatient(
+                                      patientQr: appointment.patientQrCode,
+                                    )));
+                      },
+                    ),
+                  attendWidget(appointment)
+                ],
+              ),
+            ),
+            constraints: BoxConstraints.expand(
+                width: MediaQuery.of(context).size.width * 0.90,
+                height: MediaQuery.of(context).size.height * 0.15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black,
+                  blurRadius: 2.0,
+                  spreadRadius: 0.0,
+                  offset: Offset(2.0, 2.0), // shadow direction: bottom right
+                )
+              ],
+            ))
+      ],
+    );
+    if (appointment.isNewPatient)
+      return Container(
+          child: Banner(
+              message: "New Patient",
+              color: Colors.red,
+              location: BannerLocation.topStart,
+              child: common));
+    else
+      return Container(
+        child: common,
+      );
+  }
+
+  Widget firstAppointmentWidget(Appointment appointment) {
+    return Card(
+      margin: EdgeInsets.all(20.0),
+      shape: RoundedRectangleBorder(
+        // side: BorderSide(color: Colors.green, width: 1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ExpansionTile(
+        leading: Icon(Icons.timer),
+        initiallyExpanded: true,
+        title: Text(appointment.patientDetails.name),
+        subtitle: Text(appointment.time),
+        children: <Widget>[
+          appointment.isNewPatient
+              ? Text('New Patient')
+              : RaisedButton(
+                  child: Text('View Patient History'),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => new ViewPatient(
+                                  patientQr: appointment.patientQrCode,
+                                )));
+                  },
+                ),
+          attendWidget(appointment)
+        ],
+      ),
+    );
+  }
+
+  Widget nextAppointmentWidget(Appointment appointment) {
     print('Appointmen: $appointment');
     print('time: ${appointment.time}');
     print('name: ${appointment.patientDetails.name}');
     print('phone: ${appointment.patientDetails.phNo}');
     return Card(
-      child: Column(
+      margin: EdgeInsets.all(20.0),
+      shape: RoundedRectangleBorder(
+        // side: BorderSide(color: Colors.green, width: 1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ExpansionTile(
+        title: Text(appointment.patientDetails.name),
+        subtitle: Text(appointment.time),
         children: <Widget>[
-          Text('${appointment.appointmentNo}'),
-          Text(appointment.time),
-          Text(appointment.patientDetails.name),
-          Text(appointment.patientDetails.phNo),
-          appointment.isNewPatient?
-          Text('New Patient'):
-          RaisedButton(
-            child: Text('View Patient History'),
-            onPressed: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>new ViewPatient(patientQr: appointment.patientQrCode,)));
-            },
-          ),
-          RaisedButton(
-            child: Text('Attend'),
-            onPressed: (){
-              attendAppointment(appointment.appointmentNo).then((bool result){
-                if(result==true)
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>new ScanPatient()));
-                else
-                {
-                  final SnackBar snackBar=SnackBar(content:Text('Could not process! Try again later.'));
-                  _viewAppointmentsScaffoldKey.currentState.showSnackBar(snackBar);
-                }
-              });
-               
-            },
-          )
-
+          appointment.isNewPatient
+              ? Text('New Patient')
+              : RaisedButton(
+                  child: Text('View Patient History'),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => new ViewPatient(
+                                  patientQr: appointment.patientQrCode,
+                                )));
+                  },
+                ),
+          attendWidget(appointment)
         ],
       ),
     );
+    // Card(
+    //   child: Column(
+    //     children: <Widget>[
+    //       Text('${appointment.appointmentNo}'),
+    //       Text(appointment.time),
+    //       Text(appointment.patientDetails.name),
+    //       Text(appointment.patientDetails.phNo),
 
+    //     ],
+    //   ),
+    // );
   }
 
-  Future getAppointments(String doctorAddress, String authToken,String date) async{
-    print(authToken);
-      final http.Response response = await http.post(
-      '$apiUrl/doctor/appointment/date',
-      headers: <String,String>{
-        'Content-Type': 'application/json',
-        'auth-token': authToken
+  Widget attendWidget(Appointment appointment) {
+    return InkWell(
+      child: Container(
+          width: 150,
+          height: 29,
+          child: Stack(children: <Widget>[
+            Positioned(
+                top: 0,
+                left: 0,
+                child: Container(
+                    width: 150,
+                    height: 29,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
+                      ),
+                      color: Color.fromRGBO(56, 59, 69, 1),
+                    ))),
+            Positioned(
+              top: 6,
+              left: 55,
+              child: Text(
+                'Attend',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                    color: Color.fromRGBO(255, 255, 255, 1),
+                    // fontFamily: 'Montserrat',
+                    fontSize: 13,
+                    letterSpacing:
+                        0 /*percentages not used in flutter. defaulting to zero*/,
+                    fontWeight: FontWeight.normal,
+                    height: 1),
+              ),
+            ),
+          ])),
+      onTap: () {
+        attendAppointment(appointment.appointmentNo).then((bool result) {
+          if (result == true)
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => new ScanPatient()));
+          else {
+            final SnackBar snackBar =
+                SnackBar(content: Text('Could not process! Try again later.'));
+            _viewAppointmentsScaffoldKey.currentState.showSnackBar(snackBar);
+          }
+        });
       },
-      body: jsonEncode(<String,String>{
-        'doctorAddress':doctorAddress,
-        'date': date
-      })
     );
-    if(response.statusCode==200){
+  }
+
+  Future getAppointments(
+      String doctorAddress, String authToken, String date) async {
+    print(authToken);
+    final http.Response response = await http.post(
+        '$apiUrl/doctor/appointment/date',
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'auth-token': authToken
+        },
+        body: jsonEncode(
+            <String, String>{'doctorAddress': doctorAddress, 'date': date}));
+    if (response.statusCode == 200) {
       print('Inside call: ${response.body}');
-      if(response.body.toString()!='[]')
+      if (response.body.toString() != '[]')
         return initAppointments(json.decode(response.body));
       return "No appointments";
-      
     }
-
   }
 
-  Future<bool> attendAppointment(int appointmentNo) async{
-    final http.Response response=await http.put(
-      '$apiUrl/doctor/appointment/visited',
-      headers: <String,String>{
-        'Content-Type': 'application/json',
-        'auth-token': authToken
-      },
-      body: jsonEncode(<String,int>{
-        'appointmentNumber':appointmentNo
-      })
-    );
-    if(response.statusCode==200)
+  Future<bool> attendAppointment(int appointmentNo) async {
+    final http.Response response = await http.put(
+        '$apiUrl/doctor/appointment/visited',
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'auth-token': authToken
+        },
+        body: jsonEncode(<String, int>{'appointmentNumber': appointmentNo}));
+    if (response.statusCode == 200)
       return true;
     else
       return false;
@@ -250,13 +464,16 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
     if (picked != null && picked != selectedDate)
       setState(() {
         selectedDate = picked;
-        appointments=getAppointments(this.doctorAddress,this.authToken,newFormat.format(this.selectedDate));
+        appointments = getAppointments(this.doctorAddress, this.authToken,
+            newFormat.format(this.selectedDate));
       });
   }
 
-  Future<Map<String,String>> getAuthTokenAndAddress() async{
+  Future<Map<String, String>> getAuthTokenAndAddress() async {
     final SharedPreferences prefs = await _prefs;
-    return {'authToken':prefs.get("doctorToken"),
-            'doctorAddress':prefs.get("doctorAddress")};
+    return {
+      'authToken': prefs.get("doctorToken"),
+      'doctorAddress': prefs.get("doctorAddress")
+    };
   }
 }
