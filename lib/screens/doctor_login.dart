@@ -19,7 +19,7 @@ class _DoctorLoginState extends State<DoctorLogin> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String _doctorAddress;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
+  TextEditingController passwordController = new TextEditingController();
   @override
   void initState() {
     _doctorAddress = '';
@@ -28,134 +28,203 @@ class _DoctorLoginState extends State<DoctorLogin> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Container(
-      color: Colors.white,
-      child: Column(children: <Widget>[
-        Padding(
-          child: RichText(
-            text: TextSpan(children: [
-              TextSpan(
-                  text: 'Welcome to Scribe+',
-                  style: TextStyle(
-                      fontSize: 30.0,
-                      color: Colors.black,
-                      fontFamily: 'Montserrat')),
-            ]),
-          ),
-          padding: EdgeInsets.only(top: 75, bottom: 50),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 10, bottom: 50),
-          child: Image.asset(
-            'assets/images/scribe1.jpg',
-            semanticLabel: 'Scribe Intro',
-            fit: BoxFit.fill,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 10, bottom: 30),
-          child: RichText(
-            text: TextSpan(children: [
-              TextSpan(
-                  text: 'Scan QR Code to get started',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.black,
-                  )),
-            ]),
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RaisedButton.icon(
-              icon: Icon(Icons.crop_free),
-              label: Text('Scan QR'),
-              textColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  side: BorderSide(color: Colors.lightGreenAccent[400])),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => scanQRButton()));
-              },
-              color: Colors.lightGreenAccent[400],
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    return Scaffold(
+        body: Center(
+      child: SingleChildScrollView(
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+            Padding(
+              child: RichText(
+                text: TextSpan(children: [
+                  TextSpan(
+                      text: 'Welcome to Scribe+',
+                      style: TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 32,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1)),
+                ]),
+              ),
+              padding: EdgeInsets.only(top: 75, bottom: 10),
             ),
-            RaisedButton.icon(
-              icon: Icon(Icons.lock),
-              label: Text('Password'),
-              textColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  side: BorderSide(color: Colors.lightGreenAccent[400])),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => postScanWidget()));
-              },
-              color: Colors.lightGreenAccent[400],
-            )
-          ],
-        ),
-        InkWell(
-            child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: Container(
-                    width: 71,
-                    height: 30,
-                    child: Stack(children: <Widget>[
-                      Positioned(
-                          top: 30,
-                          left: 71,
-                          child: Transform.rotate(
-                            angle: 180 * (3.14 / 180),
-                            child: SvgPicture.asset('assets/images/vector.svg',
-                                semanticsLabel: 'vector'),
-                          )),
-                      Positioned(
-                          top: 4,
-                          left: 0,
-                          child: Transform.rotate(
-                            angle: -3.0617613445625937e-22 * (3.14 / 180),
-                            child: Text(
-                              'next',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  color: Color.fromRGBO(24, 199, 99, 1),
-                                  fontFamily: 'Montserrat',
-                                  fontSize: 18,
-                                  letterSpacing:
-                                      0 /*percentages not used in flutter. defaulting to zero*/,
-                                  fontWeight: FontWeight.normal,
-                                  height: 1),
-                            ),
-                          )),
-                    ]))))
-      ]),
+            Padding(
+              padding: EdgeInsets.only(top: 10, bottom: 30),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/images/scribe1.jpg',
+                  height: 0.3 * height,
+                  width: 0.6 * width,
+                  semanticLabel: 'Scribe Intro',
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 10, bottom: 30),
+              child: RichText(
+                text: TextSpan(children: [
+                  TextSpan(
+                      text: 'Scan QR Code to get started',
+                      style: TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 23,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1)),
+                ]),
+              ),
+            ),
+            loginButtons(),
+            nextButton(),
+          ])),
     ));
   }
 
-  Widget scanQRButton() {
-    return Center(
-        child: RaisedButton.icon(
-            icon: Icon(Icons.photo_camera),
-            label: Text("Scan Your QR"),
-            onPressed: () {
-              _scan().then((String scannedString) {
-                setState(() {
-                  _doctorAddress = scannedString;
-                });
-              });
-            }));
+  Widget loginButtons() {
+    return Column(
+      children: <Widget>[scanButton(), password()],
+    );
   }
 
-  Widget postScanWidget() {
+  Widget password() {
     TextEditingController passwordController = TextEditingController();
+    return Container(
+      width: 350,
+      height: 60,
+      //color: Colors.lightGreenAccent[200],
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+          bottomLeft: Radius.circular(25),
+          bottomRight: Radius.circular(25),
+        ),
+        boxShadow: [
+          BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.25),
+              offset: Offset(0, 4),
+              blurRadius: 4)
+        ],
+        color: Color.fromRGBO(24, 199, 99, 1),
+      ),
+      child: Row(
+        children: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(left: 32),
+              child: Icon(
+                Icons.lock,
+                color: Colors.white,
+                size: 50,
+              )),
+          Padding(
+              padding: EdgeInsets.all(10),
+              child: SizedBox(
+                  width: 230,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Color.fromRGBO(255, 255, 255, 1),
+                        fontFamily: 'Montserrat',
+                        fontSize: 23,
+                        letterSpacing:
+                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        fontWeight: FontWeight.normal,
+                        height: 1),
+                    decoration: InputDecoration(
+                      hintStyle: TextStyle(
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 23,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1),
+                      hintText: "PASSWORD",
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
+                    controller: passwordController,
+                    keyboardType: TextInputType.visiblePassword,
+                    obscureText: true,
+                  )))
+        ],
+      ),
+    );
+  }
+
+  Widget scanButton() {
+    return Padding(
+        padding: EdgeInsets.all(5),
+        child: InkWell(
+          onTap: () {
+            _scan().then((String scannedString) {
+              setState(() {
+                _doctorAddress = scannedString;
+              });
+            });
+          },
+          child: Container(
+              width: 350,
+              height: 60,
+              child: Stack(children: <Widget>[
+                Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Container(
+                        width: 350,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(25),
+                            topRight: Radius.circular(25),
+                            bottomLeft: Radius.circular(25),
+                            bottomRight: Radius.circular(25),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Color.fromRGBO(0, 0, 0, 0.25),
+                                offset: Offset(0, 4),
+                                blurRadius: 4)
+                          ],
+                          color: Color.fromRGBO(24, 199, 99, 1),
+                        ))),
+                Positioned(
+                    top: 16,
+                    left: 160,
+                    child: Text(
+                      'SCAN',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 23,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1),
+                    )),
+                Positioned(
+                  top: 10,
+                  left: 38,
+                  child: SvgPicture.asset('assets/images/vector.svg',
+                      semanticsLabel: 'vector'),
+                ),
+              ])),
+        ));
+  }
+
+  /* Widget postScanWidget() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -188,6 +257,62 @@ class _DoctorLoginState extends State<DoctorLogin> {
         )
       ],
     );
+}*/
+
+  Widget nextButton() {
+    return InkWell(
+        onTap: () {
+          _postLoginRequest(_doctorAddress, passwordController.text)
+              .then((bool result) {
+            if (result == false) {
+              setState(() {
+                _doctorAddress = '';
+              });
+
+              final SnackBar snackBar = SnackBar(content: Text('Login Failed'));
+              _scaffoldKey.currentState.showSnackBar(snackBar);
+            } else
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => new Home(),
+                  ));
+          });
+        },
+        child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: Container(
+                width: 71,
+                height: 30,
+                child: Stack(children: <Widget>[
+                  Positioned(
+                      top: 30,
+                      left: 71,
+                      child: Transform.rotate(
+                        angle: 180 * (3.14 / 180),
+                        child: SvgPicture.asset('assets/images/vector.svg',
+                            semanticsLabel: 'vector'),
+                      )),
+                  Positioned(
+                      top: 20,
+                      left: 300,
+                      child: Transform.rotate(
+                        angle: -3.0617613445625937e-22 * (3.14 / 180),
+                        child: Text(
+                          'next',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                              color: Color.fromRGBO(24, 199, 99, 1),
+                              fontFamily: 'Montserrat',
+                              fontSize: 18,
+                              letterSpacing:
+                                  0 /*percentages not used in flutter. defaulting to zero*/,
+                              fontWeight: FontWeight.normal,
+                              height: 1),
+                        ),
+                      )),
+                ]))));
   }
 
   Future<bool> _postLoginRequest(String userAddress, String password) async {
