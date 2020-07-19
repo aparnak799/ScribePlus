@@ -135,29 +135,54 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
               children: <Widget>[
                 Align(
                   alignment: Alignment.centerRight,
-                  child:                 IconButton(
-                  icon: Icon(Icons.calendar_today, size: 38,),
-                  onPressed: () {
-                    pickDate();
-                  },
-                ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.calendar_today,
+                      size: 38,
+                    ),
+                    onPressed: () {
+                      pickDate();
+                    },
+                  ),
                 ),
                 Padding(
                     padding: EdgeInsets.all(15.0),
-                    child: Text(
-                      'Your Appointments for: ${DateFormat("yMMMMEEEEd").format(selectedDate)}',
-                      style: TextStyle(
-                          color: Color.fromRGBO(0, 0, 0, 1),
-                          fontFamily: 'Roboto',
-                          fontSize: 36,
-                          letterSpacing:
-                              0 /*percentages not used in flutter. defaulting to zero*/,
-                          fontWeight: FontWeight.normal,
-                          height: 1),
-                    )),
+                    child: Column(children: <Widget>[
+                      Text(
+                        'Your Appointments for:',
+                        style: TextStyle(
+                            color: Color.fromRGBO(0, 0, 0, 1),
+                            fontFamily: 'Montserrat',
+                            fontSize: 20,
+                            letterSpacing:
+                                0 /*percentages not used in flutter. defaulting to zero*/,
+                            fontWeight: FontWeight.normal,
+                            height: 1),
+                      ),
+                      Text(
+                        ' ${DateFormat("yMMMMEEEEd").format(selectedDate)}',
+                        style: TextStyle(
+                            color: Color.fromRGBO(0, 0, 0, 1),
+                            fontFamily: 'Montserrat',
+                            fontSize: 25,
+                            letterSpacing:
+                                0 /*percentages not used in flutter. defaulting to zero*/,
+                            fontWeight: FontWeight.bold,
+                            height: 1),
+                      )
+                    ])),
                 firstAppointment(snapshot.data[0]),
                 // firstAppointmentWidget(snapshot.data[0]),
-                Center(child: Text('Next Appointments')),
+                Center(
+                    child: Text('Next Appointments',
+                        style: TextStyle(
+                            color: Color.fromRGBO(88, 83, 83, 1),
+                            fontFamily: 'Montserrat',
+                            fontSize: 18,
+                            letterSpacing:
+                                0 /*percentages not used in flutter. defaulting to zero*/,
+                            fontWeight: FontWeight.w400,
+                            height: 1))),
                 for (Appointment appointment in snapshot.data.sublist(1))
                   nextAppointmentWidget(appointment),
               ],
@@ -165,19 +190,44 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
           }
           return ListView(
             children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Appointments'),
-                  IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: () {
-                      pickDate();
-                    },
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.calendar_today,
+                    size: 38,
                   ),
-                ],
+                  onPressed: () {
+                    pickDate();
+                  },
+                ),
               ),
-              Center(child: Text("No Appointments")),
+              Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: Column(children: <Widget>[
+                    Text(
+                      'Your Appointments for:',
+                      style: TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 20,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1),
+                    ),
+                    Text(
+                      ' ${DateFormat("yMMMMEEEEd").format(selectedDate)}',
+                      style: TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 25,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.bold,
+                          height: 1),
+                    )
+                  ])),
             ],
           );
         }
@@ -204,14 +254,14 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
         Container(
             constraints: BoxConstraints.expand(
                 width: MediaQuery.of(context).size.width * 0.95,
-                height: MediaQuery.of(context).size.height * 0.1),
+                height: MediaQuery.of(context).size.height * 0.12),
             margin: EdgeInsets.only(top: 20.0, right: 20.0, left: 20.0),
             decoration: BoxDecoration(
                 color: Color(0xFF18C763),
                 shape: BoxShape.rectangle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black,
+                    color: Colors.black38,
                     blurRadius: 2.0,
                     spreadRadius: 0.0,
                     offset: Offset(2.0, 2.0), // shadow direction: bottom right
@@ -225,8 +275,25 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  Text('Current Appointment'),
-                  Text(appointment.time),
+                  Text('Current Appointment',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 16,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1)),
+                  Text(appointment.time,
+                      style: TextStyle(
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 20,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.bold,
+                          height: 1)),
                 ],
               ),
             )),
@@ -250,14 +317,7 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
                   if (!appointment.isNewPatient)
                     RaisedButton(
                       child: Text('View Patient History'),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => new ViewPatient(
-                                      patientQr: appointment.patientQrCode,
-                                    )));
-                      },
+                      onPressed: () {},
                     ),
                   attendWidget(appointment)
                 ],
@@ -270,8 +330,8 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black,
-                  blurRadius: 2.0,
+                  color: Colors.black38,
+                  blurRadius: 4.0,
                   spreadRadius: 0.0,
                   offset: Offset(2.0, 2.0), // shadow direction: bottom right
                 )
@@ -292,38 +352,6 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
       );
   }
 
-  Widget firstAppointmentWidget(Appointment appointment) {
-    return Card(
-      margin: EdgeInsets.all(20.0),
-      shape: RoundedRectangleBorder(
-        // side: BorderSide(color: Colors.green, width: 1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: ExpansionTile(
-        leading: Icon(Icons.timer),
-        initiallyExpanded: true,
-        title: Text(appointment.patientDetails.name),
-        subtitle: Text(appointment.time),
-        children: <Widget>[
-          appointment.isNewPatient
-              ? Text('New Patient')
-              : RaisedButton(
-                  child: Text('View Patient History'),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => new ViewPatient(
-                                  patientQr: appointment.patientQrCode,
-                                )));
-                  },
-                ),
-          attendWidget(appointment)
-        ],
-      ),
-    );
-  }
-
   Widget nextAppointmentWidget(Appointment appointment) {
     print('Appointmen: $appointment');
     print('time: ${appointment.time}');
@@ -336,37 +364,80 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: ExpansionTile(
-        title: Text(appointment.patientDetails.name),
-        subtitle: Text(appointment.time),
+        title: Text(appointment.patientDetails.name,
+            style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Montserrat',
+                fontSize: 18,
+                letterSpacing:
+                    0 /*percentages not used in flutter. defaulting to zero*/,
+                fontWeight: FontWeight.bold,
+                height: 1)),
+        subtitle: Text(appointment.time,
+            style: TextStyle(
+                color: Color.fromRGBO(159, 154, 154, 1),
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+                letterSpacing:
+                    0 /*percentages not used in flutter. defaulting to zero*/,
+                fontWeight: FontWeight.normal,
+                height: 1)),
         children: <Widget>[
           appointment.isNewPatient
               ? Text('New Patient')
-              : RaisedButton(
-                  child: Text('View Patient History'),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => new ViewPatient(
-                                  patientQr: appointment.patientQrCode,
-                                )));
-                  },
-                ),
+              : viewPatientHistory(appointment),
           attendWidget(appointment)
         ],
       ),
     );
-    // Card(
-    //   child: Column(
-    //     children: <Widget>[
-    //       Text('${appointment.appointmentNo}'),
-    //       Text(appointment.time),
-    //       Text(appointment.patientDetails.name),
-    //       Text(appointment.patientDetails.phNo),
+  }
 
-    //     ],
-    //   ),
-    // );
+  Widget viewPatientHistory(Appointment appointment) {
+    return InkWell(
+      child: Container(
+          width: 150,
+          height: 29,
+          child: Stack(children: <Widget>[
+            Positioned(
+                top: 0,
+                left: 0,
+                child: Container(
+                    width: 150,
+                    height: 29,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
+                      ),
+                      color: Color.fromRGBO(56, 59, 69, 1),
+                    ))),
+            Positioned(
+              top: 6,
+              left: 55,
+              child: Text(
+                'View Patient History',
+                style: TextStyle(
+                    color: Color.fromRGBO(255, 255, 255, 1),
+                    fontFamily: 'Montserrat',
+                    fontSize: 15,
+                    letterSpacing:
+                        0 /*percentages not used in flutter. defaulting to zero*/,
+                    fontWeight: FontWeight.normal,
+                    height: 1),
+              ),
+            ),
+          ])),
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => new ViewPatient(
+                      patientQr: appointment.patientQrCode,
+                    )));
+      },
+    );
   }
 
   Widget attendWidget(Appointment appointment) {
@@ -395,11 +466,10 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
               left: 55,
               child: Text(
                 'Attend',
-                textAlign: TextAlign.left,
                 style: TextStyle(
                     color: Color.fromRGBO(255, 255, 255, 1),
-                    // fontFamily: 'Montserrat',
-                    fontSize: 13,
+                    fontFamily: 'Montserrat',
+                    fontSize: 15,
                     letterSpacing:
                         0 /*percentages not used in flutter. defaulting to zero*/,
                     fontWeight: FontWeight.normal,
