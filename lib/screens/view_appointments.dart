@@ -353,7 +353,7 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
   }
 
   Widget nextAppointmentWidget(Appointment appointment) {
-    print('Appointmen: $appointment');
+    print('Appointment: $appointment');
     print('time: ${appointment.time}');
     print('name: ${appointment.patientDetails.name}');
     print('phone: ${appointment.patientDetails.phNo}');

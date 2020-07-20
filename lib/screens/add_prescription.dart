@@ -1,7 +1,6 @@
 import 'dart:io' as io;
 import 'dart:core';
 import 'dart:convert';
-
 import 'package:ScribePlus/screens/processing_prescription.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +13,6 @@ import 'package:file/local.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:ScribePlus/url.dart';
 import 'package:ScribePlus/backWidget.dart';
 
@@ -42,10 +40,8 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
   DateTime currTime;
   bool completedRecording = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   _UploadAudioPrescriptionState(this.patientAddress);
-
   @override
   void initState() {
     super.initState();
@@ -133,7 +129,6 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
                           },
                         ),
                         // stopRecording(),
-
                         Container(
                             child: Center(
                                 child: _isRecording
@@ -154,8 +149,6 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
           ),
         ));
   }
-
-
 
   Widget micDisplay() {
     return Container(
@@ -186,7 +179,6 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
   //               color: _isRecording ? Colors.red : Colors.green,
   //               size: MediaQuery.of(context).size.width * 0.7)));
   // }
-
   Widget uploadWidget() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -260,7 +252,6 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
         String path = appDocDirectory.path + '/' + filename;
         await AudioRecorder.start(
             path: path, audioOutputFormat: AudioOutputFormat.AAC);
-
         bool isRecording = await AudioRecorder.isRecording;
         setState(() {
           currTime = new DateTime.now();

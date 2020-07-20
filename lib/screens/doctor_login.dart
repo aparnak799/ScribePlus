@@ -231,7 +231,8 @@ class _DoctorLoginState extends State<DoctorLogin> {
             final SnackBar snackBar = SnackBar(content: Text('Scan QR again!'));
             _scaffoldKey.currentState.showSnackBar(snackBar);
           } else if (passwordController.text == '') {
-            final SnackBar snackBar = SnackBar(content: Text('Password Not Entered!'));
+            final SnackBar snackBar =
+                SnackBar(content: Text('Password Not Entered!'));
             _scaffoldKey.currentState.showSnackBar(snackBar);
           } else {
             _postLoginRequest(_doctorAddress, passwordController.text)
