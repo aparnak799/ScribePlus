@@ -1,3 +1,4 @@
+import 'package:ScribePlus/backWidget.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
 import 'package:flutter/material.dart';
 
@@ -49,12 +50,10 @@ class _EditPrescriptionState extends State<EditPrescription> {
     // double height=MediaQuery.of(context).size.height;
     return Scaffold(
       key: _editPrescriptionScaffoldKey,
-      appBar: AppBar(
-        title: Text("Edit Prescription"),
-      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
+          backButton(context),
           prescriptionRowWidget('Diagnosis',diagnosisController),
           prescriptionRowWidget('Medicines',medicinesController),
           prescriptionRowWidget('Symptoms', symptomsController),
@@ -76,7 +75,6 @@ class _EditPrescriptionState extends State<EditPrescription> {
                 'advice':adviceController.text,
                 'patientQrCode':this.patientAddress,
                 'doctorAddress':this.doctorAddress,
-
               };
               createPrescription(requestBody).then((bool result){
                 if(result==true)

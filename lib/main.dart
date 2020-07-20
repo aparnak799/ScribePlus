@@ -1,8 +1,10 @@
+import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/doctor_login.dart';
 import 'package:ScribePlus/screens/processing_prescription.dart';
 import 'package:ScribePlus/screens/scan_patient.dart';
 import 'package:ScribePlus/screens/view_appointments.dart';
 import 'package:flutter/material.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -10,7 +12,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = 'Scribe Plus';
-    return MaterialApp(title: title, home: DoctorLogin());
+    return MaterialApp(title: title, 
+    theme: new ThemeData(scaffoldBackgroundColor: Colors.white),
+    home: 
+    // ScanPatient()
+    // UploadAudioPrescription(patientAddress: 'dummyAddress',)
+    DoctorLogin()
+    );
   }
 }
 
@@ -36,14 +44,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Scribe +"),
-      ),
       body: widgetOptions.elementAt(selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.green,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.lightBlueAccent,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.black,
         currentIndex: selectedIndex,
         onTap: (index) {
           setState(() {
