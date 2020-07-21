@@ -223,7 +223,7 @@ class _ViewPatientState extends State<ViewPatient> {
                 ],
               )),
               floatingActionButton: FloatingActionButton(
-                backgroundColor: Colors.lightBlueAccent,
+                backgroundColor: Color(0xff18C763),
                 child: Icon(Icons.add),
                 onPressed: () {
                   Navigator.push(
@@ -300,15 +300,17 @@ class _ViewPatientState extends State<ViewPatient> {
   }
 
   Widget errorWidget(String error) {
-    return Center(
+    return Scaffold(
+        body: Center(
       child: Text(error),
-    );
+    ));
   }
 
   Widget loadingWidget() {
-    return Center(
+    return Scaffold(
+        body: Center(
       child: Text("Loading"),
-    );
+    ));
   }
 
   /*Widget prescriptionCard(Prescription prescription) {

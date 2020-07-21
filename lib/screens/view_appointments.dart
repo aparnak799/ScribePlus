@@ -315,10 +315,7 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
                         height: 1),
                   ),
                   if (!appointment.isNewPatient)
-                    RaisedButton(
-                      child: Text('View Patient History'),
-                      onPressed: () {},
-                    ),
+                    viewPatientHistory(appointment),
                   attendWidget(appointment)
                 ],
               ),
