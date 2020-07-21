@@ -2,6 +2,7 @@ import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/doctor_login.dart';
 import 'package:ScribePlus/screens/processing_prescription.dart';
 import 'package:ScribePlus/screens/scan_patient.dart';
+import 'package:ScribePlus/screens/view_doctor_details.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
 import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/view_appointments.dart';
@@ -38,7 +39,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // New Screen
     Text('Upload Call'),
     // New Screen
-    Text('Profile')
+    DoctorDetails()
   ];
   @override
   void initState() {
@@ -49,7 +50,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return Scaffold(
       body: widgetOptions.elementAt(selectedIndex),
       bottomNavigationBar: BottomNavyBar(
-        backgroundColor: Colors.grey[100],
+        showElevation: false,
+        backgroundColor: Colors.white,
         selectedIndex: selectedIndex,
         onItemSelected: (index) {
           setState(() {
@@ -63,12 +65,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               activeColor: Colors.green[300],
               inactiveColor: Colors.black),
           BottomNavyBarItem(
-              icon: Icon(Icons.crop_free),
+              icon: Icon(Icons.camera_front),
               title: Text("Scan"),
               activeColor: Colors.green[300],
               inactiveColor: Colors.black),
           BottomNavyBarItem(
-              icon: Icon(Icons.call_to_action),
+              icon: Icon(Icons.call_received),
               title: Text("Upload Call"),
               activeColor: Colors.green[300],
               inactiveColor: Colors.black),
