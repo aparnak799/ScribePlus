@@ -392,17 +392,65 @@ class _ViewAppointmentsState extends State<ViewAppointments> {
     );
   }
 
+  // Widget viewPatientHistory(Appointment appointment) {
+  //   return InkWell(
+  //     child: Container(
+  //         width: 150,
+  //         height: 29,
+  //         child: Stack(children: <Widget>[
+  //           Positioned(
+  //               top: 0,
+  //               left: 0,
+  //               child: Container(
+  //                   width: 150,
+  //                   height: 29,
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: BorderRadius.only(
+  //                       topLeft: Radius.circular(30),
+  //                       topRight: Radius.circular(30),
+  //                       bottomLeft: Radius.circular(30),
+  //                       bottomRight: Radius.circular(30),
+  //                     ),
+  //                     color: Color.fromRGBO(56, 59, 69, 1),
+  //                   ))),
+  //           Positioned(
+  //             top: 6,
+  //             left: 55,
+  //             child: Text(
+  //               'View Patient History',
+  //               style: TextStyle(
+  //                   color: Color.fromRGBO(255, 255, 255, 1),
+  //                   fontFamily: 'Montserrat',
+  //                   fontSize: 15,
+  //                   letterSpacing:
+  //                       0 /*percentages not used in flutter. defaulting to zero*/,
+  //                   fontWeight: FontWeight.normal,
+  //                   height: 1),
+  //             ),
+  //           ),
+  //         ])),
+  //     onTap: () {
+  //       Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //               builder: (context) => new ViewPatient(
+  //                     patientQr: appointment.patientQrCode,
+  //                   )));
+  //     },
+  //   );
+  // }
+
   Widget viewPatientHistory(Appointment appointment) {
     return InkWell(
       child: Container(
-          width: 150,
+          width: 250,
           height: 29,
           child: Stack(children: <Widget>[
             Positioned(
                 top: 0,
                 left: 0,
                 child: Container(
-                    width: 150,
+                    width: 250,
                     height: 29,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
