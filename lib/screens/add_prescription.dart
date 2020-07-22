@@ -106,14 +106,14 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
                 : new Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                        backButton(context),
+                        backButton(_scaffoldKey.currentContext),
                         micDisplay(),
                         TikTikTimer(
                           initialDate: currTime,
                           running: timerRunning,
                           height: MediaQuery.of(context).size.height * 0.2,
                           width: MediaQuery.of(context).size.width * 0.8,
-                          backgroundColor: Colors.white,
+                          backgroundColor: Colors.transparent,
                           timerTextStyle: TextStyle(
                               color: Color.fromRGBO(0, 0, 0, 1),
                               fontFamily: 'Montserrat',

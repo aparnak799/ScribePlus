@@ -104,8 +104,8 @@ class _ViewPatientState extends State<ViewPatient> {
   @override
   Widget build(BuildContext context) {
     print(patientAddress);
-    return new MaterialApp(
-      home: patientWidget(),
+    return new Scaffold(
+      body: patientWidget(),
     );
   }
 
