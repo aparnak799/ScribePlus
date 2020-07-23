@@ -38,6 +38,7 @@ dependencies:
   flutter_portal: ^0.1.0
   flutter_svg : ^0.17.4
   auto_size_text: ^2.1.0
+  speech_to_text: ^2.3.0
 
 
   # The following adds the Cupertino Icons font to your application.

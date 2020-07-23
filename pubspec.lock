@@ -64,6 +64,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.2"
+  clock:
+    dependency: transitive
+    description:
+      name: clock
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   collection:
     dependency: transitive
     description:
@@ -174,6 +181,13 @@ packages:
     dependency: "direct main"
     description:
       name: jiffy
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
@@ -413,6 +427,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.5"
+  speech_to_text:
+    dependency: "direct main"
+    description:
+      name: speech_to_text
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.3.0"
   stack_trace:
     dependency: transitive
     description:
