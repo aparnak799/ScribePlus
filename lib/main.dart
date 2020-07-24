@@ -24,10 +24,7 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.white,
           primaryColor: Color(0xff18C763),
         ),
-        home: FollowUp(
-          patientAddress: text1,
-          socketEvent: text2,
-        ));
+        home: DoctorLogin());
   }
 }
 
