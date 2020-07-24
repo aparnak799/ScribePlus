@@ -14,14 +14,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = 'Scribe Plus';
-    String text = "test";
-    return MaterialApp(title: title, 
-    theme: ThemeData(
-      backgroundColor: Colors.white,
-      scaffoldBackgroundColor: Colors.white,
-      primaryColor: Color(0xff18C763)
-    ),
-    home: DoctorLogin());
+    String text1 = "test1";
+    String text2 = "test2";
+    return MaterialApp(
+        title: title,
+        theme: ThemeData(
+          backgroundColor: Colors.white,
+          scaffoldBackgroundColor: Colors.white,
+          primaryColor: Color(0xff18C763),
+        ),
+        home: FollowUp(
+          patientAddress: text1,
+          socketEvent: text2,
+        ));
   }
 }
 
@@ -31,7 +36,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-   int selectedIndex = 0;
+  int selectedIndex = 0;
   final widgetOptions = [
     ViewAppointments(),
     ScanPatient(),
@@ -44,6 +49,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

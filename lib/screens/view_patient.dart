@@ -237,31 +237,6 @@ class _ViewPatientState extends State<ViewPatient> {
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.endFloat,
             );
-          /*return Scaffold(
-              body: ListView(
-                children: <Widget>[
-                  Text(snapshot.data.name),
-                  Text(snapshot.data.email),
-                  Text(snapshot.data.phone),
-                  for (var prescription in snapshot.data.prescriptions)
-                    prescriptionCard(prescription),
-                ],
-              ),
-              floatingActionButton: FloatingActionButton(
-                backgroundColor: Colors.lightBlueAccent,
-                child: Icon(Icons.add),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => new UploadAudioPrescription(
-                              patientAddress: this.patientAddress)));
-                  print("Go to add prescription");
-                },
-              ),
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.endFloat,
-            );*/
           else if (snapshot.data is String)
             return Scaffold(
               body: Column(
