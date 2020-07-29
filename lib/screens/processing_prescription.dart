@@ -43,108 +43,82 @@ class _FollowUpState extends State<FollowUp> {
     socketIO.init();
     print('socketEvent: $socketEvent');
     getPrescription();
-    // getSharedPrefsSocketID().then((String socketID){
-    //   getPrescription(socketID);
-    // });
     socketIO.connect();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return topBarStyled();
-    /*  return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text("Socket"),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          _prescriptionReady == false
-              ? gettingReadyNotificationWidget()
-              : readyNotificationWidget(),
-          _skipFollowUp == false
-              ? Flexible(
-                  child: ListView(
-                    children: <Widget>[
-                      RaisedButton.icon(
-                        icon: Icon(Icons.skip_next),
-                        label: Text("Skip Follow Up"),
-                        onPressed: () {
-                          setState(() {
-                            _skipFollowUp = true;
-                          });
-                        },
-                      ),
-                      this.setFollowUpWidget()
-                    ],
-                  ),
-                )
-              : Flexible(
-                  child: ListView(
-                    children: <Widget>[
-                      RaisedButton(
-                        child: Text("Set Follow Up"),
-                        onPressed: () {
-                          setState(() {
-                            _skipFollowUp = false;
-                          });
-                        },
-                      ),
-                      Text("Insert Loading Spinner")
-                    ],
-                  ),
-                ),
-        ],
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              // topBarStyled(),
+              _prescriptionReady == false
+                  ? gettingReadyNotificationWidget()
+                  : readyNotificationWidget(),
+              patientAddress == null
+                  ? Text('No Follow for this patient')
+                  : followBodyWidget(),
+            ],
+          ),
+        ),
       ),
-    );*/
+    );
   }
 
   Widget topBarStyled() {
-    return Scaffold(
-        body: Stack(children: <Widget>[
-      Positioned(
-          top: 50,
-          left: 5,
-          child: Container(
-              width: 350,
-              height: 221,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(25),
-                  topRight: Radius.circular(25),
-                  bottomLeft: Radius.circular(25),
-                  bottomRight: Radius.circular(25),
-                ),
-                color: Color.fromRGBO(187, 220, 250, 1),
-              ))),
-      Positioned(
-          top: 60,
-          left: 20,
-          child: Text(
-            'Processing Audio File',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                color: Color.fromRGBO(0, 0, 0, 1),
-                fontFamily: 'Roboto',
-                fontSize: 32,
-                letterSpacing:
-                    0 /*percentages not used in flutter. defaulting to zero*/,
-                fontWeight: FontWeight.normal,
-                height: 1),
-          )),
-      Positioned(
-          top: 100,
-          left: 100,
-          child: Container(
-              width: 123,
-              height: 121.00000762939453,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/images/Appletouchicon21.png'),
-                    fit: BoxFit.fitWidth),
-              ))),
-    ]));
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height * 0.3,
+        child: Stack(children: <Widget>[
+          Positioned(
+              top: 50,
+              left: 5,
+              child: Container(
+                  width: 350,
+                  height: 221,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25),
+                      topRight: Radius.circular(25),
+                      bottomLeft: Radius.circular(25),
+                      bottomRight: Radius.circular(25),
+                    ),
+                    color: Color.fromRGBO(187, 220, 250, 1),
+                  ))),
+          Positioned(
+              top: 60,
+              left: 20,
+              child: Text(
+                'Processing Audio File',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                    color: Color.fromRGBO(0, 0, 0, 1),
+                    fontFamily: 'Roboto',
+                    fontSize: 32,
+                    letterSpacing:
+                        0 /*percentages not used in flutter. defaulting to zero*/,
+                    fontWeight: FontWeight.normal,
+                    height: 1),
+              )),
+          Positioned(
+              top: 100,
+              left: 100,
+              child: Container(
+                  width: 123,
+                  height: 121.00000762939453,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/images/Appletouchicon21.png'),
+                        fit: BoxFit.fitWidth),
+                  ))),
+        ]));
   }
 
   Widget gettingReadyNotificationWidget() {
@@ -192,6 +166,29 @@ class _FollowUpState extends State<FollowUp> {
   Widget followBodyWidget() {
     return Column(
       children: <Widget>[
+        _skipFollowUp == false
+            ? RaisedButton.icon(
+                icon: Icon(Icons.skip_next),
+                label: Text("Skip Follow Up"),
+                onPressed: () {
+                  setState(() {
+                    _skipFollowUp = true;
+                  });
+                },
+              )
+            : Column(
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text("Set Follow Up"),
+                    onPressed: () {
+                      setState(() {
+                        _skipFollowUp = false;
+                      });
+                    },
+                  ),
+                  Text("Insert Loading Spinner")
+                ],
+              ),
         Container(
             width: 339,
             height: 50,
@@ -496,7 +493,10 @@ class _FollowUpState extends State<FollowUp> {
   }
 
   Future<void> getPrescription() async {
-    // print(this.socketEvent);
+    print('Socket event id: ${this.socketEvent}');
+    // await socketIO.subscribe('message', (jsonResp) {
+    //   print("x:" + jsonResp);
+    // });
     return await socketIO.subscribe(this.socketEvent, (jsonResponse) {
       print("Inside Subscribe");
       response = json.decode(jsonResponse);

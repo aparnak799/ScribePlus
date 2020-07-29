@@ -5,7 +5,7 @@ import 'package:ScribePlus/screens/processing_prescription.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_timer/flutter_timer.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:audio_recorder/audio_recorder.dart';
 import 'package:file/file.dart';
@@ -198,14 +198,16 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
           color: Colors.grey,
           onPressed: () {
             uploadAudio().then((socketEvent) {
-              if (socketEvent != '')
+              print('1: $socketEvent');
+              if (socketEvent != '') {
+                print('2');
                 Navigator.pushReplacement(
                     context,
                     new MaterialPageRoute(
                         builder: (context) => FollowUp(
                             patientAddress: this.patientAddress,
                             socketEvent: socketEvent)));
-              else {
+              } else {
                 final SnackBar snackBar =
                     SnackBar(content: Text('Could not process audio'));
                 _scaffoldKey.currentState.showSnackBar(snackBar);

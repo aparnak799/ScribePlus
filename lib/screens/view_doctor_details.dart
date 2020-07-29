@@ -137,7 +137,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                           Padding(
+                            Padding(
                               padding: EdgeInsets.all(5),
                               child: Icon(
                                 Icons.mail_outline,
@@ -145,15 +145,20 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                                 color: Colors.green,
                               ),
                             ),
-                            Text(snapshot.data.email,
-                                style: TextStyle(
-                                    color: Color.fromRGBO(0, 0, 0, 1),
-                                    fontFamily: 'Montserrat',
-                                    fontSize: 20,
-                                    letterSpacing:
-                                        0 /*percentages not used in flutter. defaulting to zero*/,
-                                    fontWeight: FontWeight.normal,
-                                    height: 1))
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.7,
+                              child: FittedBox(
+                                child: Text(snapshot.data.email,
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(0, 0, 0, 1),
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 20,
+                                        letterSpacing:
+                                            0 /*percentages not used in flutter. defaulting to zero*/,
+                                        fontWeight: FontWeight.normal,
+                                        height: 1)),
+                              ),
+                            )
                           ],
                         )),
                   ],

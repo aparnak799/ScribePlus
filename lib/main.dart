@@ -6,17 +6,25 @@ import 'package:ScribePlus/screens/view_doctor_details.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
 import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/view_appointments.dart';
+import 'package:ScribePlus/screens/edit_prescription.dart';
 import 'package:flutter/material.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = 'Scribe Plus';
-    String text1 = "test1";
-    String text2 = "test2";
+    // String text1 = "test1";
+    // String text2 = "test2";
     return MaterialApp(
         title: title,
         theme: ThemeData(
@@ -24,10 +32,10 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.white,
           primaryColor: Color(0xff18C763),
         ),
-        home: FollowUp(
-          patientAddress: text1,
-          socketEvent: text2,
-        ));
+        home: DoctorLogin(
+            // patientAddress: text1,
+            // socketEvent: text2,
+            ));
   }
 }
 
@@ -44,7 +52,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // New Screen
     Text('Upload Call'),
     // New Screen
-    DoctorDetails()
+    DoctorDetails(),
+    UploadAudioPrescription(
+      patientAddress: null,
+    ),
+    // EditPrescription(patientAddress: null, prescription: null)
   ];
   @override
   void initState() {
@@ -83,6 +95,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           BottomNavyBarItem(
               icon: Icon(Icons.account_circle),
               title: Text("Account"),
+              activeColor: Colors.green[300],
+              inactiveColor: Colors.black),
+          BottomNavyBarItem(
+              icon: Icon(Icons.business_center),
+              title: Text("Anonymous"),
               activeColor: Colors.green[300],
               inactiveColor: Colors.black)
         ],
