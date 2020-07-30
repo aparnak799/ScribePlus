@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/doctor_login.dart';
 import 'package:ScribePlus/screens/processing_prescription.dart';
@@ -45,6 +46,35 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+//  static const platform = const MethodChannel('scribeplus.sendstring');
+//  String receivedString = "";
+//
+//  Future<void> callNativeFunction() async {
+//    String msg = "Hello from Flutter", data = "";
+//    try {
+//      final String temp =
+//          await platform.invokeMethod('callSendStringFun', {"arg": msg});
+//      data = temp;
+//    } on PlatformException catch (e) {
+//      data = "Failed";
+//    }
+//    setState(() {
+//      receivedString = data;
+//    });
+//  }
+//
+//  Future<void> stopFuncOp() async {
+//    bool data = false;
+//    try {
+//      final bool temp =
+//      await platform.invokeMethod('stopRecord');
+//      data = temp;
+//    } on PlatformException catch (e) {
+//      data = false;
+//    }
+//    print("data is $data");
+//  }
+
   int selectedIndex = 0;
   final widgetOptions = [
     ViewAppointments(),
@@ -66,6 +96,27 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+//      appBar: AppBar(
+//        title: Text("CallNative"),
+//      ),
+//      body: Center(
+//        child: Column(
+//          mainAxisAlignment: MainAxisAlignment.center,
+//          children: <Widget>[
+//            RaisedButton(
+//              onPressed:
+//                  callNativeFunction, //callNativeFunction is called on button pressed
+//              child: Text("Start"),
+//            ),
+//            RaisedButton(
+//              onPressed:
+//              stopFuncOp, //callNativeFunction is called on button pressed
+//              child: Text("Stop"),
+//            ),
+//            Text('$receivedString'),
+//          ],
+//        ),
+//      ),
       body: widgetOptions.elementAt(selectedIndex),
       bottomNavigationBar: BottomNavyBar(
         showElevation: false,

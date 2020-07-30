@@ -44,14 +44,14 @@ class _EditPrescriptionState extends State<EditPrescription> {
     print('Prescription: $prescription');
     print('Patient address: $patientAddress');
     diagnosisController =
-        // new TextEditingController(text: prescription['Disease']);
-        new TextEditingController();
+         new TextEditingController(text: prescription['Disease']);
+//        new TextEditingController();
     medicinesController =
-        // new TextEditingController(text: prescription['Drugs']);
-        new TextEditingController();
+         new TextEditingController(text: prescription['Drugs']);
+//        new TextEditingController();
     symptomsController =
-        // new TextEditingController(text: prescription['Symptoms']);
-        new TextEditingController();
+         new TextEditingController(text: prescription['Symptoms']);
+//        new TextEditingController();
     adviceController = new TextEditingController();
 
     //Create Patient

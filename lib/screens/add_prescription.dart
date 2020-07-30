@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' as io;
 import 'dart:core';
 import 'dart:convert';
@@ -7,7 +8,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_timer/flutter_timer.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:audio_recorder/audio_recorder.dart';
+import 'package:flutter/services.dart';
+
+// Old Package to revert to
+// import 'package:audio_recorder/audio_recorder.dart';
+
+// New Package for sound recorder
+import 'package:flutter_sound/flutter_sound.dart';
+
+// import 'package:sounds/sounds.dart';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,10 +39,46 @@ class UploadAudioPrescription extends StatefulWidget {
 class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
   bool timerRunning = false;
   bool _isRecording = false;
-  Recording _recording;
+
+  static const platform = const MethodChannel('scribeplus.sendstring');
+  String receivedString = "";
+
+  Future<void> callNativeFunction() async {
+    String msg = "Hello from Flutter", data = "";
+    try {
+      final String temp =
+      await platform.invokeMethod('callSendStringFun', {"arg": msg});
+      data = temp;
+    } on PlatformException catch (e) {
+      data = "Failed";
+    }
+    setState(() {
+      _audioFullPath = data;
+    });
+  }
+
+  Future<void> stopFuncOp() async {
+    bool data = false;
+    try {
+      final bool temp =
+      await platform.invokeMethod('stopRecord');
+      data = temp;
+    } on PlatformException catch (e) {
+      data = false;
+    }
+    print("data is $data");
+  }
+
+  // FlutterSoundRecorder myPlayer = FlutterSoundRecorder();
+  // static String recording = Track.tempFile(AdtsAacMediaFormat());
+  // var track = Track.fromFile(recording, mediaFormat: AdtsAacMediaFormat());
+  // var recorder = SoundRecorder();
+
+  // Recording _recording;
+
   PermissionStatus _permissionStatus = PermissionStatus.undetermined;
   Permission _permission = Permission.speech;
-  String _audioFullPath;
+  String _audioFullPath = "/storage/emulated/0/recording.mp3";
   TextEditingController _controller = new TextEditingController();
   String _uploadResponseStatus;
   String authToken;
@@ -227,6 +273,16 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
     });
   } //Request permissions for Audio
 
+  // Future<void> startRecorder({
+  //   Codec codec = Codec.aacADTS,
+  //   String toFile,
+  //   Stream toStream,
+  //   int sampleRate = 48000,
+  //   int numChannels = 1,
+  //   int bitRate = 16000,
+  //   AudioSource audioSource = AudioSource.microphone,
+  // });
+
   Future<String> uploadAudio() async {
     final SharedPreferences prefs = await _prefs;
     var request =
@@ -246,45 +302,118 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
   }
 
   _start() async {
-    try {
-      if (_permissionStatus == PermissionStatus.granted) {
-        io.Directory appDocDirectory = await getApplicationDocumentsDirectory();
-        String filename =
-            new DateTime.now().millisecondsSinceEpoch.toString() + '.mp4';
-        String path = appDocDirectory.path + '/' + filename;
-        await AudioRecorder.start(
-            path: path, audioOutputFormat: AudioOutputFormat.AAC);
-        bool isRecording = await AudioRecorder.isRecording;
-        setState(() {
-          currTime = new DateTime.now();
-          timerRunning = true;
-          _audioFullPath = path;
-          _recording = new Recording(duration: new Duration(), path: "");
-          _isRecording = isRecording;
-        });
-      } else {
-        Scaffold.of(context).showSnackBar(
-            new SnackBar(content: new Text("You must accept permissions")));
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  _stop() async {
-    var recording = await AudioRecorder.stop();
-    print("Stop recording: ${recording.path}");
-    bool isRecording = await AudioRecorder.isRecording;
-    File file = widget.localFileSystem.file(recording.path);
-    print(" File length: ${await file.length()}");
+    await callNativeFunction();
     setState(() {
+      _isRecording = true;
+      timerRunning = true;
+      currTime = new DateTime.now();
+    });
+  }
+//    try {
+//      if (_permissionStatus == PermissionStatus.granted) {
+//        io.Directory appDocDirectory = await getApplicationDocumentsDirectory();
+//        String filename =
+//            new DateTime.now().millisecondsSinceEpoch.toString() + '.mp4';
+//        String path = appDocDirectory.path + '/' + filename;
+//
+//        // recorder.onStopped = ({wasUser}) {
+//        //   recorder.release();
+//        // };
+//        // recorder.record(track).then((value) {
+//        //   setState(() {
+//        //     _isRecording = true;
+//        //     _audioFullPath = path;
+//        //     currTime = new DateTime.now();
+//        //     timerRunning = true;
+//        //   });
+//        // });
+//
+//        // Directory tempDir = await getTemporaryDirectory();
+//        // File filePath = File('${appDocDirectory.path}/$filename');
+//
+//        // await AudioRecorder.start(
+//        //     path: path, audioOutputFormat: AudioOutputFormat.AAC);
+//        // bool isRecording = await AudioRecorder.isRecording;
+//        // setState(() {
+//        //   currTime = new DateTime.now();
+//        //   timerRunning = true;
+//        //   _audioFullPath = path;
+//        //   _recording = new Recording(duration: new Duration(), path: "");
+//        //   _isRecording = isRecording;
+//        // });
+//        //--------------------------------------------------------------------
+//        await myPlayer.openAudioSession(
+//          // device: AudioDevice.speaker,
+//          mode: SessionMode.modeDefault,
+//          focus: AudioFocus.requestFocusTransient,
+//          category: SessionCategory.playAndRecord,
+//        );
+//        myPlayer
+//            .startRecorder(
+//          audioSource: AudioSource.microphone,
+//          sampleRate: 48000,
+//          bitRate: 128000,
+//          codec: Codec.aacMP4,
+//          numChannels: 1,
+//          toFile: path,
+//        )
+//            .then((value) {
+//          setState(() {
+//            _isRecording = true;
+//            _audioFullPath = path;
+//            currTime = new DateTime.now();
+//            timerRunning = true;
+//          });
+//          print("x^ ${myPlayer.startRecorder()}");
+//        }).catchError((onError) {
+//          print("Please show me the error" + onError);
+//        });
+//        //--------------------------------------------------------------------
+//      } else {
+//        Scaffold.of(context).showSnackBar(
+//            new SnackBar(content: new Text("You must accept permissions")));
+//      }
+//    } catch (e) {
+//      print(e);
+//    }
+//  }
+//
+  _stop() async {
+    await stopFuncOp();
+    setState(() {
+      _isRecording = false;
       completedRecording = true;
       timerRunning = false;
-      _recording = recording;
-      _isRecording = isRecording;
     });
-    _controller.text = recording.path;
   }
+//    // var recording = await AudioRecorder.stop();
+//    // print("Stop recording: ${recording.path}");
+//    // bool isRecording = await AudioRecorder.isRecording;
+//    // File file = widget.localFileSystem.file(recording.path);
+//    // print(" File length: ${await file.length()}");
+//    // setState(() {
+//    //   completedRecording = true;
+//    //   timerRunning = false;
+//    //   _recording = recording;
+//    //   _isRecording = isRecording;
+//    // });
+//    // _controller.text = recording.path;
+//    // recorder.stop().then((value) => {
+//    //       setState(() {
+//    //         _isRecording = false;
+//    //         completedRecording = true;
+//    //         timerRunning = false;
+//    //       })
+//    //     });
+//    myPlayer.stopRecorder().then((value) async {
+//      setState(() {
+//        _isRecording = false;
+//        completedRecording = true;
+//        timerRunning = false;
+//      });
+//      await myPlayer.closeAudioSession();
+//    });
+//  }
 
   Future<String> getAuthToken() async {
     final SharedPreferences prefs = await _prefs;
