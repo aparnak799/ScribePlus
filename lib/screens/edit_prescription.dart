@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:ScribePlus/backWidget.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
 import 'package:flutter/material.dart';
@@ -22,16 +25,27 @@ class _EditPrescriptionState extends State<EditPrescription> {
   String patientAddress;
   String doctorAddress;
   String doctorAuthToken;
+
   TextEditingController diagnosisController;
   TextEditingController medicinesController;
   TextEditingController symptomsController;
   TextEditingController adviceController;
+
+  //Create Patient
+  TextEditingController patientNameController;
+  TextEditingController patientAgeController;
+  TextEditingController patientPhoneController;
+  TextEditingController patientGenderController;
+  TextEditingController patientEmailController;
+
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   _EditPrescriptionState(this.patientAddress, this.prescription);
+
   @override
   void initState() {
     print('Prescription: $prescription');
     print('Patient address: $patientAddress');
+
     diagnosisController =
         new TextEditingController(text: prescription['Disease']);
     medicinesController =
@@ -39,12 +53,21 @@ class _EditPrescriptionState extends State<EditPrescription> {
     symptomsController =
         new TextEditingController(text: prescription['Symptoms']);
     adviceController = new TextEditingController();
+
+    //Create Patient
+    patientNameController = new TextEditingController();
+    patientPhoneController = new TextEditingController();
+    patientEmailController = new TextEditingController();
+    patientAgeController = new TextEditingController();
+    patientGenderController = new TextEditingController();
+
     getDoctorCredentialsfromSharedPrefs().then((docCredentials) {
       setState(() {
-        this.doctorAddress = docCredentials['doctorAddress'];
-        this.doctorAuthToken = docCredentials['doctorAuth'];
+        doctorAddress = docCredentials['doctorAddress'];
+        doctorAuthToken = docCredentials['doctorAuth'];
       });
     });
+
     super.initState();
   }
 
@@ -56,48 +79,85 @@ class _EditPrescriptionState extends State<EditPrescription> {
     // double height=MediaQuery.of(context).size.height;
     return Scaffold(
       key: _editPrescriptionScaffoldKey,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: ListView(
         children: <Widget>[
           backButton(context),
           topBarStyled(),
-          prescriptionRowWidget('Diagnosis', diagnosisController),
-          prescriptionRowWidget('Medicines', medicinesController),
-          prescriptionRowWidget('Symptoms', symptomsController),
-          prescriptionRowWidget('Advice', adviceController),
+          patientAddress == null ? fullDetailsWidget() : halfDetailsWidget(),
+          // prescriptionRowWidget('Diagnosis', diagnosisController),
+          // prescriptionRowWidget('Medicines', medicinesController),
+          // prescriptionRowWidget('Symptoms', symptomsController),
+          // prescriptionRowWidget('Advice', adviceController),
           RaisedButton.icon(
             icon: Icon(Icons.send),
             label: Text("Generate Report"),
             onPressed: () {
-              print({
-                'Diagnosis': diagnosisController.text,
-                'Medicines': medicinesController.text,
-                'Symptoms': medicinesController.text,
-                'Advice': adviceController.text
-              });
-              var requestBody = {
-                'medicines': medicinesController.text,
-                'symptoms': symptomsController.text,
-                'diagnosis': diagnosisController.text,
-                'advice': adviceController.text,
-                'patientQrCode': this.patientAddress,
-                'doctorAddress': this.doctorAddress,
+              // print({
+              //   'Diagnosis': diagnosisController.text,
+              //   'Medicines': medicinesController.text,
+              //   'Symptoms': medicinesController.text,
+              //   'Advice': adviceController.text
+              // });
+
+              var patientRequest = {
+                'name': patientNameController.text,
+                'phno': patientPhoneController.text,
+                'email': patientEmailController.text,
+                'dob': patientAgeController.text,
+                'gender': patientGenderController.text
               };
-              createPrescription(requestBody).then((bool result) {
-                if (result == true)
-                  Navigator.pushReplacement(
-                      context,
-                      new MaterialPageRoute(
-                          builder: (context) => new ViewPatient(
-                                patientQr: patientAddress,
-                              )));
-                else {
-                  final SnackBar snackBar = SnackBar(
-                      content:
-                          Text('Could not upload prescription! Try later'));
-                  _editPrescriptionScaffoldKey.currentState
-                      .showSnackBar(snackBar);
-                }
+              print('Pressed generate pres');
+              // var requestBody = {
+              //   'medicines': medicinesController.text,
+              //   'symptoms': symptomsController.text,
+              //   'diagnosis': diagnosisController.text,
+              //   'advice': adviceController.text,
+              //   'patientQrCode': this.patientAddress,
+              //   'doctorAddress': this.doctorAddress,
+              // };
+              createPatient(patientRequest).then((value) {
+                print("RESP BODY" + value);
+                print("initial doc addr" + this.doctorAddress);
+
+                getAccess({
+                  "patientQrCode": value,
+                  "address": this.doctorAddress,
+                }).then((resp) {
+                  if (resp == "GRANTED") {
+                    createPrescription({
+                      'medicines': medicinesController.text,
+                      'symptoms': symptomsController.text,
+                      'diagnosis': diagnosisController.text,
+                      'advice': adviceController.text,
+                      'patientQrCode': value,
+                      'doctorAddress': this.doctorAddress,
+                    }).then((bool result) {
+                      print('Entering call: $result');
+                      print("Pat Qr Code" + value);
+                      print("final doc Addr" + this.doctorAddress);
+                      if (result == true)
+                        Navigator.pushReplacement(
+                            context,
+                            new MaterialPageRoute(
+                                builder: (context) => new ViewPatient(
+                                      patientQr: value,
+                                    )));
+                      else {
+                        final SnackBar snackBar = SnackBar(
+                            content: Text(
+                                'Could not upload prescription! Try later part1'));
+                        _editPrescriptionScaffoldKey.currentState
+                            .showSnackBar(snackBar);
+                      }
+                    });
+                  } else {
+                    final SnackBar snackBar = SnackBar(
+                        content: Text(
+                            'Could not upload prescription! Try later part2'));
+                    _editPrescriptionScaffoldKey.currentState
+                        .showSnackBar(snackBar);
+                  }
+                });
               });
             },
           )
@@ -155,26 +215,140 @@ class _EditPrescriptionState extends State<EditPrescription> {
     );
   }
 
+  Widget createPatientWidget(String textKey, TextEditingController controller) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Text(textKey),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.6,
+          child: TextField(
+            controller: controller,
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget fullDetailsWidget() {
+    return Column(
+      children: <Widget>[
+        createPatientWidget('Patient Name', patientNameController),
+        createPatientWidget('Patient Phone', patientPhoneController),
+        createPatientWidget('Patient Email', patientEmailController),
+        createPatientWidget('Patient Age', patientAgeController),
+        createPatientWidget('Patient Gender', patientGenderController),
+        prescriptionRowWidget('Diagnosis', diagnosisController),
+        prescriptionRowWidget('Medicines', medicinesController),
+        prescriptionRowWidget('Symptoms', symptomsController),
+        prescriptionRowWidget('Advice', adviceController),
+      ],
+    );
+  }
+
+  Widget halfDetailsWidget() {
+    return Column(
+      children: <Widget>[
+        prescriptionRowWidget('Diagnosis', diagnosisController),
+        prescriptionRowWidget('Medicines', medicinesController),
+        prescriptionRowWidget('Symptoms', symptomsController),
+        prescriptionRowWidget('Advice', adviceController),
+      ],
+    );
+  }
+
   Future getDoctorCredentialsfromSharedPrefs() async {
     final SharedPreferences prefs = await _prefs;
     return {
-      'doctorAddress': prefs.get('doctoAddress'),
-      'doctorAuth': prefs.get('auth-token')
+      'doctorAddress': prefs.get('doctorAddress'),
+      'doctorAuth': prefs.get('doctorToken')
     };
   }
 
-  Future<bool> createPrescription(var requestBody) async {
+  Future<String> createPatient(var requestBody) {
+    String createPatientUrl = '$apiUrl/patient/create';
+    return http
+        .post(createPatientUrl,
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'auth-token': this.doctorAuthToken,
+            },
+            body: jsonEncode(<String, String>{
+              'name': patientNameController.text,
+              'phno': patientPhoneController.text,
+              'email': patientEmailController.text,
+              'dob': patientAgeController.text,
+              'gender': patientGenderController.text,
+            }))
+        .then((value) {
+      print("op");
+      print(value.body);
+      print(value.statusCode);
+      if (value.statusCode == 200) {
+        print("if" + value.body);
+        return json.decode(value.body)['result']['account'];
+      } else {
+        print("else" + value.body);
+        return null;
+      }
+    });
+  }
+
+  Future<String> getAccess(var requestBody) {
+    String uploadUrl = '$apiUrl/patient/prescription/access';
+    return http
+        .post(uploadUrl,
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'auth-token': this.doctorAuthToken,
+            },
+            body: jsonEncode(<String, String>{
+              "patientQrCode": requestBody['patientQrCode'],
+              "address": requestBody['address']
+            }))
+        .then((value) {
+      if (value.statusCode == 200) {
+        return json.decode(value.body)['access'];
+      } else {
+        return null;
+      }
+    });
+  }
+
+  Future<bool> createPrescription(var requestBody) {
     String uploadUrl = '$apiUrl/patient/prescription/create';
-    var response = await http.post(uploadUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'auth-token': this.doctorAuthToken
-        },
-        body: requestBody);
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      return false;
-    }
+    // final http.Response response = await
+    return http
+        .post(uploadUrl,
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'auth-token': this.doctorAuthToken,
+            },
+            body: jsonEncode(<String, String>{
+              // "medicines": "Dolo",
+              // "symptoms": "Cough",
+              // "diagnosis": "Cold",
+              // "advice": "Take Rest",
+              // "patientQrCode": requestBody['patientQrCode'],
+              // "doctorAddress": requestBody['doctorAddress']
+              'medicines': requestBody['medicines'],
+              'symptoms': requestBody['symptoms'],
+              'diagnosis': requestBody['diagnosis'],
+              'advice': requestBody['advice'],
+              'patientQrCode': requestBody['patientQrCode'],
+              'doctorAddress': requestBody['doctorAddress'],
+            }))
+        .then((value) {
+      print('res: $value');
+      // print('Entered Auth was : ' + this.doctorAuthToken);
+      // print(response.body);
+      if (value.statusCode == 200) {
+        print('Success');
+        return true;
+      } else {
+        print('Failed');
+        return false;
+      }
+    });
   }
 }
