@@ -43,61 +43,32 @@ class _FollowUpState extends State<FollowUp> {
     socketIO.init();
     print('socketEvent: $socketEvent');
     getPrescription();
-    // getSharedPrefsSocketID().then((String socketID){
-    //   getPrescription(socketID);
-    // });
     socketIO.connect();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return topBarStyled();
-    /*  return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text("Socket"),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          _prescriptionReady == false
-              ? gettingReadyNotificationWidget()
-              : readyNotificationWidget(),
-          _skipFollowUp == false
-              ? Flexible(
-                  child: ListView(
-                    children: <Widget>[
-                      RaisedButton.icon(
-                        icon: Icon(Icons.skip_next),
-                        label: Text("Skip Follow Up"),
-                        onPressed: () {
-                          setState(() {
-                            _skipFollowUp = true;
-                          });
-                        },
-                      ),
-                      this.setFollowUpWidget()
-                    ],
-                  ),
-                )
-              : Flexible(
-                  child: ListView(
-                    children: <Widget>[
-                      RaisedButton(
-                        child: Text("Set Follow Up"),
-                        onPressed: () {
-                          setState(() {
-                            _skipFollowUp = false;
-                          });
-                        },
-                      ),
-                      Text("Insert Loading Spinner")
-                    ],
-                  ),
-                ),
-        ],
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              _prescriptionReady == false
+                  ? gettingReadyNotificationWidget()
+                  : readyNotificationWidget(),
+              patientAddress == null
+                  ? Text('No Follow for this patient')
+                    : followBodyWidget(),
+            ],
+          ),
+        ),
       ),
-    );*/
+    );
   }
 
   Widget topBarStyled() {
@@ -192,6 +163,29 @@ class _FollowUpState extends State<FollowUp> {
   Widget followBodyWidget() {
     return Column(
       children: <Widget>[
+        _skipFollowUp == false
+            ? RaisedButton.icon(
+          icon: Icon(Icons.skip_next),
+          label: Text("Skip Follow Up"),
+          onPressed: () {
+            setState(() {
+              _skipFollowUp = true;
+            });
+          },
+        )
+            : Column(
+          children: <Widget>[
+            RaisedButton(
+              child: Text("Set Follow Up"),
+              onPressed: () {
+                setState(() {
+                  _skipFollowUp = false;
+                });
+              },
+            ),
+            Text("Insert Loading Spinner")
+          ],
+        ),
         Container(
             width: 339,
             height: 50,
@@ -207,7 +201,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -252,7 +246,7 @@ class _FollowUpState extends State<FollowUp> {
                                   fontFamily: 'Roboto',
                                   fontSize: 32,
                                   letterSpacing:
-                                      0 /*percentages not used in flutter. defaulting to zero*/,
+                                  0 /*percentages not used in flutter. defaulting to zero*/,
                                   fontWeight: FontWeight.normal,
                                   height: 1),
                             )),
@@ -310,7 +304,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -325,7 +319,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -340,7 +334,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -360,7 +354,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -375,7 +369,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                            0 /*percentages not used in flutter. defaulting to zero*/,
+                        0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),

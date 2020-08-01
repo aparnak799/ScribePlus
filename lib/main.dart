@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/doctor_login.dart';
 import 'package:ScribePlus/screens/processing_prescription.dart';
@@ -8,8 +9,15 @@ import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/view_appointments.dart';
 import 'package:flutter/material.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -41,7 +49,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // New Screen
     Text('Upload Call'),
     // New Screen
-    DoctorDetails()
+    DoctorDetails(),
+    UploadAudioPrescription(
+      patientAddress: null,
+    ),
   ];
   @override
   void initState() {
@@ -80,6 +91,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           BottomNavyBarItem(
               icon: Icon(Icons.account_circle),
               title: Text("Account"),
+              activeColor: Colors.green[300],
+              inactiveColor: Colors.black),
+          BottomNavyBarItem(
+              icon: Icon(Icons.business_center),
+              title: Text("Anonymous"),
               activeColor: Colors.green[300],
               inactiveColor: Colors.black)
         ],
