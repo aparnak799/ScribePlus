@@ -1,19 +1,65 @@
 import 'dart:convert';
 import 'dart:io';
 
-
 import 'package:ScribePlus/backWidget.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
+import 'package:beauty_textfield/beauty_textfield.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ScribePlus/url.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+class Medicine {
+  final String dosage;
+  final String duration;
+  final String foodtime;
+  final String form;
+  final String freq;
+  final String medicine;
+  final String route;
+  final String strength;
+  final String onone;
+  Medicine(
+      {this.dosage,
+      this.duration,
+      this.foodtime,
+      this.form,
+      this.freq,
+      this.medicine,
+      this.route,
+      this.strength,
+      this.onone});
+}
 
+List<Map> items = [
+  {
+    "dosage": "3",
+    "duration": "",
+    "foodtime": "(AF)",
+    "form": "tablets",
+    "frequency": "every morning and night after meal and apply",
+    "medicine": "Hydroxychloroquine 20 mg",
+    "onone": "1-0-1",
+    "route": "",
+    "strength": "20 mg"
+  },
+  {
+    "dosage": "20ml",
+    "duration": "for the next 7 days",
+    "foodtime": "",
+    "form": "Ointment",
+    "frequency": "every night once a day",
+    "medicine": "QC 8 Eye Ointment 20ml",
+    "onone": "0-0-1",
+    "route": "",
+    "strength": ""
+  }
+];
 
 class EditPrescription extends StatefulWidget {
-  final Map prescription;
+  final List prescription;
   final String patientAddress;
   final String patientName;
   final String patientAge;
@@ -21,15 +67,28 @@ class EditPrescription extends StatefulWidget {
   final String patientGender;
   final String patientEmail;
   EditPrescription(
-      {Key key, @required this.patientAddress, @required this.prescription, @required this.patientName, @required this.patientEmail, @required this.patientGender,@required this.patientAge, @required this.patientPhone})
+      {Key key,
+      @required this.patientAddress,
+      @required this.prescription,
+      @required this.patientName,
+      @required this.patientEmail,
+      @required this.patientGender,
+      @required this.patientAge,
+      @required this.patientPhone})
       : super(key: key);
   @override
-  _EditPrescriptionState createState() =>
-      _EditPrescriptionState(this.patientAddress, this.prescription, this.patientName, this.patientEmail, this.patientGender, this.patientAge, this.patientPhone);
+  _EditPrescriptionState createState() => _EditPrescriptionState(
+      this.patientAddress,
+      this.prescription,
+      this.patientName,
+      this.patientEmail,
+      this.patientGender,
+      this.patientAge,
+      this.patientPhone);
 }
 
 class _EditPrescriptionState extends State<EditPrescription> {
-  Map prescription;
+  List prescription;
   String patientAddress;
   String doctorAddress;
   String doctorAuthToken;
@@ -38,32 +97,38 @@ class _EditPrescriptionState extends State<EditPrescription> {
   String patientEmail;
   String patientGender;
   String patientPhone;
+  final GlobalKey<ScaffoldState> _editPrescriptionScaffoldKey =
+      new GlobalKey<ScaffoldState>();
 
   TextEditingController diagnosisController;
   TextEditingController medicinesController;
   TextEditingController symptomsController;
   TextEditingController adviceController;
 
-
-
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  _EditPrescriptionState(this.patientAddress, this.prescription, this.patientName, this.patientEmail, this.patientGender, this.patientAge, this.patientPhone);
+  _EditPrescriptionState(
+      this.patientAddress,
+      this.prescription,
+      this.patientName,
+      this.patientEmail,
+      this.patientGender,
+      this.patientAge,
+      this.patientPhone);
 
   @override
   void initState() {
     print('Prescription: $prescription');
     print('Patient address: $patientAddress');
 
-    diagnosisController =
-        new TextEditingController(text: prescription['Disease']);
-    medicinesController =
-        new TextEditingController(text: prescription['Drugs']);
-    symptomsController =
-        new TextEditingController(text: prescription['Symptoms']);
+    // diagnosisController =
+    //     new TextEditingController(text: prescription['Disease']);
+    // medicinesController =
+    //     new TextEditingController(text: prescription['Drugs']);
+    // symptomsController =
+    //     new TextEditingController(text: prescription['Symptoms']);
     adviceController = new TextEditingController();
 
     //Create Patient
-
 
     getDoctorCredentialsfromSharedPrefs().then((docCredentials) {
       setState(() {
@@ -77,97 +142,20 @@ class _EditPrescriptionState extends State<EditPrescription> {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _editPrescriptionScaffoldKey =
-        new GlobalKey<ScaffoldState>();
     // double width=MediaQuery.of(context).size.width;
     // double height=MediaQuery.of(context).size.height;
     return Scaffold(
-      key: _editPrescriptionScaffoldKey,
-      body: ListView(
-        children: <Widget>[
-          backButton(context),
-          topBarStyled(),
-          patientAddress == null ? fullDetailsWidget() : halfDetailsWidget(),
-          // prescriptionRowWidget('Diagnosis', diagnosisController),
-          // prescriptionRowWidget('Medicines', medicinesController),
-          // prescriptionRowWidget('Symptoms', symptomsController),
-          // prescriptionRowWidget('Advice', adviceController),
-          RaisedButton.icon(
-            icon: Icon(Icons.send),
-            label: Text("Generate Report"),
-            onPressed: () {
-              // print({
-              //   'Diagnosis': diagnosisController.text,
-              //   'Medicines': medicinesController.text,
-              //   'Symptoms': medicinesController.text,
-              //   'Advice': adviceController.text
-              // });
-
-              var patientRequest = {
-                'name': patientName,
-                'phno': patientPhone,
-                'email': patientEmail,
-                'dob': patientAge,
-                'gender': patientGender
-              };
-              print('Pressed generate pres');
-              // var requestBody = {
-              //   'medicines': medicinesController.text,
-              //   'symptoms': symptomsController.text,
-              //   'diagnosis': diagnosisController.text,
-              //   'advice': adviceController.text,
-              //   'patientQrCode': this.patientAddress,
-              //   'doctorAddress': this.doctorAddress,
-              // };
-              createPatient(patientRequest).then((value) {
-                print("RESP BODY" + value);
-                print("initial doc addr" + this.doctorAddress);
-
-                getAccess({
-                  "patientQrCode": value,
-                  "address": this.doctorAddress,
-                }).then((resp) {
-                  if (resp == "GRANTED") {
-                    createPrescription({
-                      'medicines': medicinesController.text,
-                      'symptoms': symptomsController.text,
-                      'diagnosis': diagnosisController.text,
-                      'advice': adviceController.text,
-                      'patientQrCode': value,
-                      'doctorAddress': this.doctorAddress,
-                    }).then((bool result) {
-                      print('Entering call: $result');
-                      print("Pat Qr Code" + value);
-                      print("final doc Addr" + this.doctorAddress);
-                      if (result == true)
-                        Navigator.pushReplacement(
-                            context,
-                            new MaterialPageRoute(
-                                builder: (context) => new ViewPatient(
-                                      patientQr: value,
-                                    )));
-                      else {
-                        final SnackBar snackBar = SnackBar(
-                            content: Text(
-                                'Could not upload prescription! Try later part1'));
-                        _editPrescriptionScaffoldKey.currentState
-                            .showSnackBar(snackBar);
-                      }
-                    });
-                  } else {
-                    final SnackBar snackBar = SnackBar(
-                        content: Text(
-                            'Could not upload prescription! Try later part2'));
-                    _editPrescriptionScaffoldKey.currentState
-                        .showSnackBar(snackBar);
-                  }
-                });
-              });
-            },
-          )
-        ],
-      ),
-    );
+        key: _editPrescriptionScaffoldKey,
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            backButton(_editPrescriptionScaffoldKey.currentContext),
+            topBarStyled(),
+            Expanded(
+              child: displayPrescription(),
+            )
+          ],
+        ));
   }
 
   Widget topBarStyled() {
@@ -219,8 +207,6 @@ class _EditPrescriptionState extends State<EditPrescription> {
     );
   }
 
-
-
   Widget fullDetailsWidget() {
     return Column(
       children: <Widget>[
@@ -241,6 +227,100 @@ class _EditPrescriptionState extends State<EditPrescription> {
         prescriptionRowWidget('Advice', adviceController),
       ],
     );
+  }
+
+  Widget displayPrescription() {
+    return ListView.builder(
+        itemCount: prescription.length,
+        itemBuilder: (context, index) {
+          final item = prescription[index];
+          TextEditingController formC = new TextEditingController();
+          TextEditingController medC = new TextEditingController();
+          TextEditingController dosageC = new TextEditingController();
+          TextEditingController freqC=new TextEditingController();
+          formC.text = item['form'];
+          medC.text = item['medicine'];
+          dosageC.text = item['dosage'];
+          freqC.text=item['frequency'];
+          return Dismissible(
+            // Specify the direction to swipe and delete
+            direction: DismissDirection.endToStart,
+            key: Key(item['medicine']),
+            onDismissed: (direction) {
+              // Removes that item the list on swipwe
+              setState(() {
+                items.removeAt(index);
+              });
+              // Shows the information on Snackbar
+              Scaffold.of(context)
+                  .showSnackBar(SnackBar(content: Text("$item dismissed")));
+            },
+            background: Container(color: Colors.red),
+            child: 
+            Padding(
+              padding:EdgeInsets.all(10),
+              child:Container(
+                
+                color: Colors.green[50],
+                width:
+                    MediaQuery.of(_editPrescriptionScaffoldKey.currentContext)
+                        .size
+                        .width,
+                height: MediaQuery.of(context).size.height * 0.2,
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            Padding(
+                                padding: EdgeInsets.all(10),
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  child: CupertinoTextField(
+                                    controller: formC,
+                                  ),
+                                )),
+                            Expanded(
+                              child: CupertinoTextField(
+                                controller: medC,
+                              ),
+                            ),
+                            // Text(item['form']),
+                          ],
+                        )),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          child: CupertinoTextField(
+                            padding: EdgeInsets.all(10),
+                            controller: dosageC,
+                          ),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          child: CupertinoTextField(
+                            padding: EdgeInsets.all(10),
+                            controller: freqC,
+                          ),
+                        ),
+                        // Expanded(
+                        //   child: CupertinoTextField(
+                        //     controller: medC,
+                        //   ),
+                        // ),
+                        // Text(item['form']),
+                      ],
+                    )
+                  ],
+                ))),
+            // ListTile(title: Text('${item['medicine']}')),
+          );
+        });
   }
 
   Future getDoctorCredentialsfromSharedPrefs() async {
@@ -326,8 +406,6 @@ class _EditPrescriptionState extends State<EditPrescription> {
             }))
         .then((value) {
       print('res: $value');
-      // print('Entered Auth was : ' + this.doctorAuthToken);
-      // print(response.body);
       if (value.statusCode == 200) {
         print('Success');
         return true;

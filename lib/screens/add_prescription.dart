@@ -138,7 +138,7 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
                 : new Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                        backButton(_scaffoldKey.currentContext),
+                        // backButton(_scaffoldKey.currentContext),
                         micDisplay(),
                         TikTikTimer(
                           initialDate: currTime,
@@ -231,7 +231,7 @@ class _UploadAudioPrescriptionState extends State<UploadAudioPrescription> {
           onPressed: () {
             uploadAudio().then((socketEvent) {
               if (socketEvent != '')
-                Navigator.pushReplacement(
+                Navigator.push(
                     context,
                     new MaterialPageRoute(
                         builder: (context) => FollowUp(

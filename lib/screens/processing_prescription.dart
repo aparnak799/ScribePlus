@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:ScribePlus/backWidget.dart';
+import 'package:ScribePlus/screens/view_patient.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
@@ -12,7 +14,7 @@ import 'package:ScribePlus/screens/edit_prescription.dart';
 import 'package:ScribePlus/url.dart';
 import 'package:beauty_textfield/beauty_textfield.dart';
 
-class Medicine{
+class Medicine {
   final String dosage;
   final String duration;
   final String foodtime;
@@ -20,20 +22,18 @@ class Medicine{
   final String freq;
   final String medicine;
   final String route;
-  final String strength; 
+  final String strength;
   final String onone;
-  Medicine({
-    this.dosage,
-    this.duration,
-    this.foodtime,
-    this.form,
-    this.freq,
-    this.medicine,
-    this.route,
-    this.strength,
-    this.onone
-  });
-
+  Medicine(
+      {this.dosage,
+      this.duration,
+      this.foodtime,
+      this.form,
+      this.freq,
+      this.medicine,
+      this.route,
+      this.strength,
+      this.onone});
 }
 
 class FollowUp extends StatefulWidget {
@@ -57,6 +57,7 @@ class _FollowUpState extends State<FollowUp> {
   bool _skipFollowUp;
   String socketEvent;
   String patientAddress;
+  List prescriptionResponse= new List();
 
   //Create Patient
   TextEditingController patientNameController;
@@ -67,8 +68,11 @@ class _FollowUpState extends State<FollowUp> {
   _FollowUpState(this.patientAddress, this.socketEvent);
   bool isExpanded;
 
+  final GlobalKey<ScaffoldState> _processPrescriptionScaffoldKey =
+      new GlobalKey<ScaffoldState>();
+
   @override
-  void initState() { //REMOVE THIS ...FOR TESTING PURPOSES
+  void initState() {
     isExpanded = false;
     patientNameController = new TextEditingController();
     patientPhoneController = new TextEditingController();
@@ -90,6 +94,7 @@ class _FollowUpState extends State<FollowUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _processPrescriptionScaffoldKey,
       body: Center(
           child: SingleChildScrollView(
               child: Container(
@@ -98,20 +103,22 @@ class _FollowUpState extends State<FollowUp> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      _prescriptionReady == false
+                      backButton(_processPrescriptionScaffoldKey.currentContext),
+                      this._prescriptionReady == false
                           ? gettingReadyNotificationWidget()
                           : readyNotificationWidget(),
                       // readyNotificationWidget(),
-                      Center(child: Text("Enter Patient Details while processing",
-                      textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      // color: Color.fromRGBO(255, 255, 255, 1),
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 18,
-                                      letterSpacing:
-                                          0 /*percentages not used in flutter. defaulting to zero*/,
-                                      fontWeight: FontWeight.normal,
-                                      height: 1))),
+                      Center(
+                          child: Text("Enter Patient Details while processing",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  // color: Color.fromRGBO(255, 255, 255, 1),
+                                  fontFamily: 'Montserrat',
+                                  fontSize: 18,
+                                  letterSpacing:
+                                      0 /*percentages not used in flutter. defaulting to zero*/,
+                                  fontWeight: FontWeight.normal,
+                                  height: 1))),
                       Padding(
                         padding: EdgeInsets.all(0),
                         child: Container(
@@ -153,7 +160,9 @@ class _FollowUpState extends State<FollowUp> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         BeautyTextfield(
-          width: isExpanded==true?MediaQuery.of(context).size.width*0.85:MediaQuery.of(context).size.width*0.75,
+          width: isExpanded == true
+              ? MediaQuery.of(context).size.width * 0.85
+              : MediaQuery.of(context).size.width * 0.75,
           height: 60,
           backgroundColor: Colors.white,
           duration: Duration(milliseconds: 300),
@@ -162,9 +171,9 @@ class _FollowUpState extends State<FollowUp> {
             Icons.keyboard,
           ),
           placeholder: textKey,
-          onTap: (){
+          onTap: () {
             setState(() {
-              isExpanded=true;
+              isExpanded = true;
             });
           },
           onSubmitted: (d) {
@@ -203,7 +212,7 @@ class _FollowUpState extends State<FollowUp> {
 
   Widget gettingReadyNotificationWidget() {
     return Padding(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -211,7 +220,7 @@ class _FollowUpState extends State<FollowUp> {
                 style: TextStyle(
                     // color: Color.fromRGBO(255, 255, 255, 1),
                     fontFamily: 'Montserrat',
-                    fontSize: 28,
+                    fontSize: 20,
                     letterSpacing:
                         0 /*percentages not used in flutter. defaulting to zero*/,
                     fontWeight: FontWeight.normal,
@@ -256,17 +265,18 @@ class _FollowUpState extends State<FollowUp> {
                       height: 1)),
               onPressed: () {
                 socketIO.disconnect();
-                Navigator.pushReplacement(
+                Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => new EditPrescription(
-                            prescription: this.prescription,
-                            patientAddress: this.patientAddress,
-                            patientAge: this.patientAgeController.text,
-                            patientEmail: this.patientEmailController.text,
-                            patientGender: this.patientGenderController.text,
-                            patientName: this.patientNameController.text,
-                            patientPhone: this.patientPhoneController.text,)));
+                              prescription: this.prescriptionResponse,
+                              patientAddress: this.patientAddress,
+                              patientAge: this.patientAgeController.text,
+                              patientEmail: this.patientEmailController.text,
+                              patientGender: this.patientGenderController.text,
+                              patientName: this.patientNameController.text,
+                              patientPhone: this.patientPhoneController.text,
+                            )));
                 print(prescription);
               },
             )
@@ -608,27 +618,28 @@ class _FollowUpState extends State<FollowUp> {
     ));
   }
 
-  Future<void> getPrescription() async {
+  Future getPrescription() async {
     // print(this.socketEvent);
-    return await socketIO.subscribe(this.socketEvent, (jsonResponse) {
+
+    await socketIO.subscribe(this.socketEvent, (jsonResponse) {
       print("Inside Subscribe");
       response = json.decode(jsonResponse);
       print(response);
-      setState(() {
-        _prescriptionReady = true;
-        prescription = {
-          'Disease': response['disease'],
-          'Drugs': response['drug'],
-          'Symptoms': response['symptoms']
-        };
+      setState((){
+        this._prescriptionReady= true;
+        response['medicines'].forEach((pres) async=>(this.prescriptionResponse.add({
+            'medicine': pres['medicine'],
+            'dosage': pres['dosage'],
+            'strength': pres['strength'],
+            'form': pres['form'],
+            'route': pres['route'],
+            'frequency': pres['frequency'],
+            'duration': pres['duration'],
+            'onone': pres['onone'],
+            'foodtime': pres['foodtime']
+          })));          
       });
     });
+    print('SUBS${this._prescriptionReady}');
   }
-
-  // Future<String> getSharedPrefsSocketID() async{
-  //   SharedPreferences _prefs = await SharedPreferences.getInstance();
-  //   String socketID= _prefs.getString("Socket-Id");
-  //   _prefs.remove("Socket-Id");
-  //   return "1594098288464";//Change Socket ID
-  // }
 }
