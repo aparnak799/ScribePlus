@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+
 import 'package:ScribePlus/backWidget.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
 import 'package:flutter/material.dart';
@@ -9,15 +10,22 @@ import 'package:ScribePlus/url.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
 class EditPrescription extends StatefulWidget {
   final Map prescription;
   final String patientAddress;
+  final String patientName;
+  final String patientAge;
+  final String patientPhone;
+  final String patientGender;
+  final String patientEmail;
   EditPrescription(
-      {Key key, @required this.patientAddress, @required this.prescription})
+      {Key key, @required this.patientAddress, @required this.prescription, @required this.patientName, @required this.patientEmail, @required this.patientGender,@required this.patientAge, @required this.patientPhone})
       : super(key: key);
   @override
   _EditPrescriptionState createState() =>
-      _EditPrescriptionState(this.patientAddress, this.prescription);
+      _EditPrescriptionState(this.patientAddress, this.prescription, this.patientName, this.patientEmail, this.patientGender, this.patientAge, this.patientPhone);
 }
 
 class _EditPrescriptionState extends State<EditPrescription> {
@@ -25,21 +33,21 @@ class _EditPrescriptionState extends State<EditPrescription> {
   String patientAddress;
   String doctorAddress;
   String doctorAuthToken;
+  String patientName;
+  String patientAge;
+  String patientEmail;
+  String patientGender;
+  String patientPhone;
 
   TextEditingController diagnosisController;
   TextEditingController medicinesController;
   TextEditingController symptomsController;
   TextEditingController adviceController;
 
-  //Create Patient
-  TextEditingController patientNameController;
-  TextEditingController patientAgeController;
-  TextEditingController patientPhoneController;
-  TextEditingController patientGenderController;
-  TextEditingController patientEmailController;
+
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  _EditPrescriptionState(this.patientAddress, this.prescription);
+  _EditPrescriptionState(this.patientAddress, this.prescription, this.patientName, this.patientEmail, this.patientGender, this.patientAge, this.patientPhone);
 
   @override
   void initState() {
@@ -55,11 +63,7 @@ class _EditPrescriptionState extends State<EditPrescription> {
     adviceController = new TextEditingController();
 
     //Create Patient
-    patientNameController = new TextEditingController();
-    patientPhoneController = new TextEditingController();
-    patientEmailController = new TextEditingController();
-    patientAgeController = new TextEditingController();
-    patientGenderController = new TextEditingController();
+
 
     getDoctorCredentialsfromSharedPrefs().then((docCredentials) {
       setState(() {
@@ -100,11 +104,11 @@ class _EditPrescriptionState extends State<EditPrescription> {
               // });
 
               var patientRequest = {
-                'name': patientNameController.text,
-                'phno': patientPhoneController.text,
-                'email': patientEmailController.text,
-                'dob': patientAgeController.text,
-                'gender': patientGenderController.text
+                'name': patientName,
+                'phno': patientPhone,
+                'email': patientEmail,
+                'dob': patientAge,
+                'gender': patientGender
               };
               print('Pressed generate pres');
               // var requestBody = {
@@ -169,7 +173,7 @@ class _EditPrescriptionState extends State<EditPrescription> {
   Widget topBarStyled() {
     return Stack(children: <Widget>[
       Container(
-          width: 375,
+          width: MediaQuery.of(context).size.width,
           height: 240,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(
@@ -215,29 +219,11 @@ class _EditPrescriptionState extends State<EditPrescription> {
     );
   }
 
-  Widget createPatientWidget(String textKey, TextEditingController controller) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Text(textKey),
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.6,
-          child: TextField(
-            controller: controller,
-          ),
-        )
-      ],
-    );
-  }
+
 
   Widget fullDetailsWidget() {
     return Column(
       children: <Widget>[
-        createPatientWidget('Patient Name', patientNameController),
-        createPatientWidget('Patient Phone', patientPhoneController),
-        createPatientWidget('Patient Email', patientEmailController),
-        createPatientWidget('Patient Age', patientAgeController),
-        createPatientWidget('Patient Gender', patientGenderController),
         prescriptionRowWidget('Diagnosis', diagnosisController),
         prescriptionRowWidget('Medicines', medicinesController),
         prescriptionRowWidget('Symptoms', symptomsController),
@@ -274,11 +260,11 @@ class _EditPrescriptionState extends State<EditPrescription> {
               'auth-token': this.doctorAuthToken,
             },
             body: jsonEncode(<String, String>{
-              'name': patientNameController.text,
-              'phno': patientPhoneController.text,
-              'email': patientEmailController.text,
-              'dob': patientAgeController.text,
-              'gender': patientGenderController.text,
+              'name': patientName,
+              'phno': patientPhone,
+              'email': patientEmail,
+              'dob': patientAge,
+              'gender': patientGender,
             }))
         .then((value) {
       print("op");

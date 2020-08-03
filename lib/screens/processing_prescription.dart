@@ -4,11 +4,37 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:flutter_socket_io/socket_io_manager.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:ScribePlus/screens/edit_prescription.dart';
 import 'package:ScribePlus/url.dart';
+import 'package:beauty_textfield/beauty_textfield.dart';
+
+class Medicine{
+  final String dosage;
+  final String duration;
+  final String foodtime;
+  final String form;
+  final String freq;
+  final String medicine;
+  final String route;
+  final String strength; 
+  final String onone;
+  Medicine({
+    this.dosage,
+    this.duration,
+    this.foodtime,
+    this.form,
+    this.freq,
+    this.medicine,
+    this.route,
+    this.strength,
+    this.onone
+  });
+
+}
 
 class FollowUp extends StatefulWidget {
   final String socketEvent;
@@ -32,9 +58,23 @@ class _FollowUpState extends State<FollowUp> {
   String socketEvent;
   String patientAddress;
 
+  //Create Patient
+  TextEditingController patientNameController;
+  TextEditingController patientAgeController;
+  TextEditingController patientPhoneController;
+  TextEditingController patientGenderController;
+  TextEditingController patientEmailController;
   _FollowUpState(this.patientAddress, this.socketEvent);
+  bool isExpanded;
+
   @override
-  void initState() {
+  void initState() { //REMOVE THIS ...FOR TESTING PURPOSES
+    isExpanded = false;
+    patientNameController = new TextEditingController();
+    patientPhoneController = new TextEditingController();
+    patientEmailController = new TextEditingController();
+    patientAgeController = new TextEditingController();
+    patientGenderController = new TextEditingController();
     _prescriptionReady = false;
     _skipFollowUp = false;
     questionPicked = 'Question';
@@ -50,114 +90,188 @@ class _FollowUpState extends State<FollowUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Socket"),
-      ),
       body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              _prescriptionReady == false
-                  ? gettingReadyNotificationWidget()
-                  : readyNotificationWidget(),
-              patientAddress == null
-                  ? Text('No Follow for this patient')
-                    : followBodyWidget(),
-            ],
-          ),
-        ),
-      ),
+          child: SingleChildScrollView(
+              child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      _prescriptionReady == false
+                          ? gettingReadyNotificationWidget()
+                          : readyNotificationWidget(),
+                      // readyNotificationWidget(),
+                      Center(child: Text("Enter Patient Details while processing",
+                      textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      // color: Color.fromRGBO(255, 255, 255, 1),
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 18,
+                                      letterSpacing:
+                                          0 /*percentages not used in flutter. defaulting to zero*/,
+                                      fontWeight: FontWeight.normal,
+                                      height: 1))),
+                      Padding(
+                        padding: EdgeInsets.all(0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height * 0.6,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(60),
+                              topRight: Radius.circular(60),
+                              bottomLeft: Radius.circular(0),
+                              bottomRight: Radius.circular(0),
+                            ),
+                            color: Color.fromRGBO(24, 199, 99, 1),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              createPatientWidget(
+                                  'Patient Name', patientNameController),
+                              createPatientWidget(
+                                  'Patient Phone', patientPhoneController),
+                              createPatientWidget(
+                                  'Patient Email', patientEmailController),
+                              createPatientWidget(
+                                  'Patient Age', patientAgeController),
+                              createPatientWidget(
+                                  'Patient Gender', patientGenderController),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  )))),
     );
   }
 
-  Widget topBarStyled() {
-    return Scaffold(
-        body: Stack(children: <Widget>[
-      Positioned(
-          top: 50,
-          left: 5,
-          child: Container(
-              width: 350,
-              height: 221,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(25),
-                  topRight: Radius.circular(25),
-                  bottomLeft: Radius.circular(25),
-                  bottomRight: Radius.circular(25),
-                ),
-                color: Color.fromRGBO(187, 220, 250, 1),
-              ))),
-      Positioned(
-          top: 60,
-          left: 20,
-          child: Text(
-            'Processing Audio File',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                color: Color.fromRGBO(0, 0, 0, 1),
-                fontFamily: 'Roboto',
-                fontSize: 32,
-                letterSpacing:
-                    0 /*percentages not used in flutter. defaulting to zero*/,
-                fontWeight: FontWeight.normal,
-                height: 1),
-          )),
-      Positioned(
-          top: 100,
-          left: 100,
-          child: Container(
-              width: 123,
-              height: 121.00000762939453,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/images/Appletouchicon21.png'),
-                    fit: BoxFit.fitWidth),
-              ))),
-    ]));
+  Widget createPatientWidget(String textKey, TextEditingController controller) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        BeautyTextfield(
+          width: isExpanded==true?MediaQuery.of(context).size.width*0.85:MediaQuery.of(context).size.width*0.75,
+          height: 60,
+          backgroundColor: Colors.white,
+          duration: Duration(milliseconds: 300),
+          inputType: TextInputType.text,
+          prefixIcon: Icon(
+            Icons.keyboard,
+          ),
+          placeholder: textKey,
+          onTap: (){
+            setState(() {
+              isExpanded=true;
+            });
+          },
+          onSubmitted: (d) {
+            switch (textKey) {
+              case 'Patient Name':
+                setState(() {
+                  patientNameController.text = d;
+                });
+                break;
+              case 'Patient Phone':
+                setState(() {
+                  patientPhoneController.text = d;
+                });
+                break;
+              case 'Patient Email':
+                setState(() {
+                  patientEmailController.text = d;
+                });
+                break;
+              case 'Patient Age':
+                setState(() {
+                  patientAgeController.text = d;
+                });
+                break;
+              case 'Patient Gender':
+                setState(() {
+                  patientGenderController.text = d;
+                });
+                break;
+            }
+          },
+        ),
+      ],
+    );
   }
 
   Widget gettingReadyNotificationWidget() {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Container(
-            height: MediaQuery.of(context).size.height * 0.05,
-            width: constraints.maxWidth,
-            color: Colors.lightGreen,
-            child: Text("Your prescription is getting ready"));
-      },
-    );
+    return Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Prescription is getting processed...',
+                style: TextStyle(
+                    // color: Color.fromRGBO(255, 255, 255, 1),
+                    fontFamily: 'Montserrat',
+                    fontSize: 28,
+                    letterSpacing:
+                        0 /*percentages not used in flutter. defaulting to zero*/,
+                    fontWeight: FontWeight.normal,
+                    height: 1)),
+            Padding(
+                padding: EdgeInsets.all(10),
+                child: SpinKitPouringHourglass(
+                    // color: Colors.white,
+                    size: 200.0,
+                    color: Color(0xff18C763)
+                    // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+                    )),
+          ],
+        ));
   }
 
   Widget readyNotificationWidget() {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Container(
-            height: MediaQuery.of(context).size.height * 0.05,
-            width: constraints.maxWidth,
-            color: Colors.lightGreen,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text("Your Prescription is ready"),
-                FlatButton(
-                  child: Text("View"),
-                  onPressed: () {
-                    socketIO.disconnect();
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => new EditPrescription(
-                                prescription: this.prescription,
-                                patientAddress: this.patientAddress)));
-                    print(prescription);
-                  },
-                )
-              ],
-            ));
-      },
-    );
+    return Container(
+        padding: EdgeInsets.all(20),
+        // height: MediaQuery.of(context).size.height * 0.15,
+        width: MediaQuery.of(context).size.width,
+        // color: Color(0xff18C763),
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Container(
+              width: 120,
+              height: 120,
+              child: Image.asset('assets/images/el_ok-circle.png',
+                  semanticLabel: 'vector'),
+            ),
+            FlatButton(
+              child: Text("Click to view report",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'Montserrat',
+                      fontSize: 20,
+                      letterSpacing:
+                          0 /*percentages not used in flutter. defaulting to zero*/,
+                      fontWeight: FontWeight.normal,
+                      height: 1)),
+              onPressed: () {
+                socketIO.disconnect();
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => new EditPrescription(
+                            prescription: this.prescription,
+                            patientAddress: this.patientAddress,
+                            patientAge: this.patientAgeController.text,
+                            patientEmail: this.patientEmailController.text,
+                            patientGender: this.patientGenderController.text,
+                            patientName: this.patientNameController.text,
+                            patientPhone: this.patientPhoneController.text,)));
+                print(prescription);
+              },
+            )
+          ],
+        ));
   }
 
   Widget followBodyWidget() {
@@ -165,27 +279,32 @@ class _FollowUpState extends State<FollowUp> {
       children: <Widget>[
         _skipFollowUp == false
             ? RaisedButton.icon(
-          icon: Icon(Icons.skip_next),
-          label: Text("Skip Follow Up"),
-          onPressed: () {
-            setState(() {
-              _skipFollowUp = true;
-            });
-          },
-        )
+                icon: Icon(Icons.skip_next),
+                label: Text("Skip Follow Up"),
+                onPressed: () {
+                  setState(() {
+                    _skipFollowUp = true;
+                  });
+                },
+              )
             : Column(
-          children: <Widget>[
-            RaisedButton(
-              child: Text("Set Follow Up"),
-              onPressed: () {
-                setState(() {
-                  _skipFollowUp = false;
-                });
-              },
-            ),
-            Text("Insert Loading Spinner")
-          ],
-        ),
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text("Set Follow Up"),
+                    onPressed: () {
+                      setState(() {
+                        _skipFollowUp = false;
+                      });
+                    },
+                  ),
+                  SpinKitHourGlass(
+                      // color: Colors.white,
+                      size: 50.0,
+                      color: Colors.white
+                      // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+                      )
+                ],
+              ),
         Container(
             width: 339,
             height: 50,
@@ -201,7 +320,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
+                            0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -246,7 +365,7 @@ class _FollowUpState extends State<FollowUp> {
                                   fontFamily: 'Roboto',
                                   fontSize: 32,
                                   letterSpacing:
-                                  0 /*percentages not used in flutter. defaulting to zero*/,
+                                      0 /*percentages not used in flutter. defaulting to zero*/,
                                   fontWeight: FontWeight.normal,
                                   height: 1),
                             )),
@@ -304,7 +423,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
+                            0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -319,7 +438,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
+                            0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -334,7 +453,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
+                            0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -354,7 +473,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
+                            0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),
@@ -369,7 +488,7 @@ class _FollowUpState extends State<FollowUp> {
                         fontFamily: 'Montserrat',
                         fontSize: 26,
                         letterSpacing:
-                        0 /*percentages not used in flutter. defaulting to zero*/,
+                            0 /*percentages not used in flutter. defaulting to zero*/,
                         fontWeight: FontWeight.normal,
                         height: 1),
                   )),

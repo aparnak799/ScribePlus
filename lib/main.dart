@@ -7,6 +7,7 @@ import 'package:ScribePlus/screens/view_doctor_details.dart';
 import 'package:ScribePlus/screens/view_patient.dart';
 import 'package:ScribePlus/screens/add_prescription.dart';
 import 'package:ScribePlus/screens/view_appointments.dart';
+import 'package:ScribePlus/screens/edit_prescription.dart';
 import 'package:flutter/material.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +33,10 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.white,
           primaryColor: Color(0xff18C763),
         ),
-        home: DoctorLogin());
+        home: 
+        // EditPrescription(patientAddress:'', prescription:{}, patientName:'', patientEmail:'', patientGender:'', patientAge:'', patientPhone:'' ));
+        DoctorLogin());
+        // FollowUp(patientAddress:'',socketEvent: ''));
   }
 }
 
