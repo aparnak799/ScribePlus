@@ -58,6 +58,8 @@ class _FollowUpState extends State<FollowUp> {
   String socketEvent;
   String patientAddress;
   List prescriptionResponse= new List();
+  // String disease;
+  // String symptoms;
 
   //Create Patient
   TextEditingController patientNameController;
@@ -627,6 +629,8 @@ class _FollowUpState extends State<FollowUp> {
       print(response);
       setState((){
         this._prescriptionReady= true;
+        // this._disease=response['disease'];
+        // this._symptoms=response['symptoms'];
         response['medicines'].forEach((pres) async=>(this.prescriptionResponse.add({
             'medicine': pres['medicine'],
             'dosage': pres['dosage'],

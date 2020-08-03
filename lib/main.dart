@@ -34,7 +34,17 @@ class MyApp extends StatelessWidget {
           primaryColor: Color(0xff18C763),
         ),
         home: 
-        // EditPrescription(patientAddress:'', prescription:{}, patientName:'', patientEmail:'', patientGender:'', patientAge:'', patientPhone:'' ));
+        // EditPrescription(patientAddress:'', prescription:[{
+        //       "dosage": "5",
+        //       "duration": "two weeks",
+        //       "form": "tablets",
+        //       "foodtime": "(AF)",
+        //       "frequency": "every morning and night after meal and apply",
+        //       "medicine": "Hydroxychloroquine 20 mg",
+        //       "onone": "1-0-1",
+        //       "route": "",
+        //       "strength": "20 mg"
+        //     }], patientName:'', patientEmail:'', patientGender:'', patientAge:'', patientPhone:'' ));
         DoctorLogin());
         // FollowUp(patientAddress:'',socketEvent: ''));
   }

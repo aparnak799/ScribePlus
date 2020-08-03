@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ScribePlus/url.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,31 +33,6 @@ class Medicine {
       this.strength,
       this.onone});
 }
-
-List<Map> items = [
-  {
-    "dosage": "3",
-    "duration": "",
-    "foodtime": "(AF)",
-    "form": "tablets",
-    "frequency": "every morning and night after meal and apply",
-    "medicine": "Hydroxychloroquine 20 mg",
-    "onone": "1-0-1",
-    "route": "",
-    "strength": "20 mg"
-  },
-  {
-    "dosage": "20ml",
-    "duration": "for the next 7 days",
-    "foodtime": "",
-    "form": "Ointment",
-    "frequency": "every night once a day",
-    "medicine": "QC 8 Eye Ointment 20ml",
-    "onone": "0-0-1",
-    "route": "",
-    "strength": ""
-  }
-];
 
 class EditPrescription extends StatefulWidget {
   final List prescription;
@@ -153,7 +129,8 @@ class _EditPrescriptionState extends State<EditPrescription> {
             topBarStyled(),
             Expanded(
               child: displayPrescription(),
-            )
+            ),
+            postButton()
           ],
         ));
   }
@@ -237,11 +214,11 @@ class _EditPrescriptionState extends State<EditPrescription> {
           TextEditingController formC = new TextEditingController();
           TextEditingController medC = new TextEditingController();
           TextEditingController dosageC = new TextEditingController();
-          TextEditingController freqC=new TextEditingController();
+          TextEditingController freqC = new TextEditingController();
           formC.text = item['form'];
           medC.text = item['medicine'];
           dosageC.text = item['dosage'];
-          freqC.text=item['frequency'];
+          freqC.text = item['frequency'];
           return Dismissible(
             // Specify the direction to swipe and delete
             direction: DismissDirection.endToStart,
@@ -249,78 +226,157 @@ class _EditPrescriptionState extends State<EditPrescription> {
             onDismissed: (direction) {
               // Removes that item the list on swipwe
               setState(() {
-                items.removeAt(index);
+                prescription.removeAt(index);
               });
               // Shows the information on Snackbar
               Scaffold.of(context)
-                  .showSnackBar(SnackBar(content: Text("$item dismissed")));
+                  .showSnackBar(SnackBar(content: Text("Prescription dismissed")));
             },
             background: Container(color: Colors.red),
-            child: 
-            Padding(
-              padding:EdgeInsets.all(10),
-              child:Container(
-                
-                color: Colors.green[50],
-                width:
-                    MediaQuery.of(_editPrescriptionScaffoldKey.currentContext)
+            child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Container(
+                    color: Colors.green[50],
+                    width: MediaQuery.of(
+                            _editPrescriptionScaffoldKey.currentContext)
                         .size
                         .width,
-                height: MediaQuery.of(context).size.height * 0.2,
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.all(10),
-                                child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.3,
+                                      child: CupertinoTextField(
+                                        controller: formC,
+                                        onSubmitted: (param){
+                                      item['form']=param;
+                                    }
+                                      ),
+                                    )),
+                                Expanded(
                                   child: CupertinoTextField(
-                                    controller: formC,
+                                    controller: medC,
+                                    onSubmitted: (param){
+                                      item['medicine']=param;
+                                    },
                                   ),
-                                )),
-                            Expanded(
+                                ),
+                                // Text(item['form']),
+                              ],
+                            )),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.3,
                               child: CupertinoTextField(
-                                controller: medC,
+                                padding: EdgeInsets.all(10),
+                                controller: dosageC,
+                                onSubmitted: (param){
+                                      item['dosage']=param;
+                                    }
                               ),
                             ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.4,
+                              child: CupertinoTextField(
+                                padding: EdgeInsets.all(10),
+                                controller: freqC,
+                                onSubmitted: (param){
+                                      item['frequency']=param;
+                                    }
+                              ),
+                            ),
+                            // Expanded(
+                            //   child: CupertinoTextField(
+                            //     controller: medC,
+                            //   ),
+                            // ),
                             // Text(item['form']),
                           ],
-                        )),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          child: CupertinoTextField(
-                            padding: EdgeInsets.all(10),
-                            controller: dosageC,
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          child: CupertinoTextField(
-                            padding: EdgeInsets.all(10),
-                            controller: freqC,
-                          ),
-                        ),
-                        // Expanded(
-                        //   child: CupertinoTextField(
-                        //     controller: medC,
-                        //   ),
-                        // ),
-                        // Text(item['form']),
+                        )
                       ],
-                    )
-                  ],
-                ))),
+                    ))),
             // ListTile(title: Text('${item['medicine']}')),
           );
         });
+  }
+
+  Widget postButton() {
+    return Padding(
+        padding: EdgeInsets.only(top: 70),
+        child: InkWell(
+          onTap: () {
+            var reqbody={
+              'name': patientName,
+              'phno': patientPhone,
+              'email': patientEmail,
+              'dob': patientAge,
+              'gender': patientGender,
+              'address':'Chennai',
+              'date':'03-08-2020',
+              'out':{
+                    'result':{
+                      'medicines': prescription
+                    }
+              }
+            };
+            createPDF(reqbody).then((onValue){
+              print(onValue);
+            });
+
+
+          },      
+          child: Container(
+              width: 350,
+              height: 60,
+              child: Stack(children: <Widget>[
+                Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Container(
+                        width: 350,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(25),
+                            topRight: Radius.circular(25),
+                            bottomLeft: Radius.circular(25),
+                            bottomRight: Radius.circular(25),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Color.fromRGBO(0, 0, 0, 0.25),
+                                offset: Offset(0, 4),
+                                blurRadius: 4)
+                          ],
+                          color: Color.fromRGBO(24, 199, 99, 1),
+                        ))),
+                Positioned(
+                    child: Center(
+                      child: Text(
+                      'Generate PDF',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                          fontFamily: 'Montserrat',
+                          fontSize: 23,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.normal,
+                          height: 1),
+                    ))),
+
+              ])),
+        ));
   }
 
   Future getDoctorCredentialsfromSharedPrefs() async {
@@ -360,6 +416,41 @@ class _EditPrescriptionState extends State<EditPrescription> {
     });
   }
 
+  Future<bool> createPDF(var requestBody){
+    String createPatientUrl = '$apiUrl/patient/prescription/create/pdf';
+    return http
+        .post(createPatientUrl,
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'name': patientName,
+              'phno': patientPhone,
+              'email': patientEmail,
+              'dob': patientAge,
+              'gender': patientGender,
+              'address':'Chennai',
+              'date':'03-08-2020',
+              'out':{
+                    'result':{
+                      'medicines': prescription
+                    }
+              }
+            }))
+        .then((value) {
+      print("op");
+      print(value.body);
+      print(value.statusCode);
+      if (value.statusCode == 200) {
+        print("if" + value.body);
+        return true;
+      } else {
+        print("else" + value.body);
+        return false;
+      }
+    });
+  }
+
   Future<String> getAccess(var requestBody) {
     String uploadUrl = '$apiUrl/patient/prescription/access';
     return http
@@ -382,13 +473,12 @@ class _EditPrescriptionState extends State<EditPrescription> {
   }
 
   Future<bool> createPrescription(var requestBody) {
-    String uploadUrl = '$apiUrl/patient/prescription/create';
+    String uploadUrl = '$apiUrl/patient/prescription/create/pdf"';
     // final http.Response response = await
     return http
         .post(uploadUrl,
             headers: <String, String>{
               'Content-Type': 'application/json',
-              'auth-token': this.doctorAuthToken,
             },
             body: jsonEncode(<String, String>{
               // "medicines": "Dolo",
